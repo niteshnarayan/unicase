@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.unicase.ui.unicasecommon.Activator;
+import org.unicase.ui.unicasecommon.ECPModelelementContext;
 import org.unicase.ui.unicasecommon.common.util.UnicaseUiUtil;
 
 /**

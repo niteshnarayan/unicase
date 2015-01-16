@@ -24,6 +24,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.unicase.model.UnicaseModelElement;
 import org.unicase.model.diagram.DiagramPackage;
 import org.unicase.model.diagram.MEDiagram;
+import org.unicase.ui.unicasecommon.ECPModelelementContext;
 import org.unicase.ui.unicasecommon.common.util.DNDHelper;
 import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
 import org.unicase.ui.unicasecommon.diagram.commands.CreateViewCommand;

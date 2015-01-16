@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
+import org.unicase.ui.unicasecommon.meeditor.mecontrols.AbstractMEControl;
 import org.unicase.ui.unicasecommon.meeditor.mecontrols.AbstractUnicaseMEControl;
 
 /**

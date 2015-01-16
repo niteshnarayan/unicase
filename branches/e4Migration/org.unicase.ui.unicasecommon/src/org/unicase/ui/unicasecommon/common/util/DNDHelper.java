@@ -17,6 +17,7 @@ import org.eclipse.gmf.runtime.emf.type.core.IClientContext;
 import org.eclipse.gmf.runtime.emf.type.core.IElementType;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.unicase.model.diagram.MEDiagram;
+import org.unicase.ui.unicasecommon.ECPModelelementContext;
 
 /**
  * Helper class for DND.

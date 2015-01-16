@@ -34,6 +34,7 @@ import org.unicase.model.diagram.ComponentDiagram;
 import org.unicase.model.diagram.MEDiagram;
 import org.unicase.model.diagram.StateDiagram;
 import org.unicase.model.diagram.UseCaseDiagram;
+import org.unicase.ui.unicasecommon.ECPModelelementContext;
 
 /**
  * @author Hodaie This class contains some utility method for commands and handlers.

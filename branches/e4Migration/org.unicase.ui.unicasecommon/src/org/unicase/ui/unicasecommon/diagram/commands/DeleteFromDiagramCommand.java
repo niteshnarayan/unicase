@@ -17,6 +17,7 @@ import org.eclipse.gmf.runtime.common.core.command.CommandResult;
 import org.eclipse.gmf.runtime.emf.type.core.commands.DestroyElementCommand;
 import org.eclipse.gmf.runtime.emf.type.core.requests.DestroyElementRequest;
 import org.unicase.model.diagram.MEDiagram;
+import org.unicase.ui.unicasecommon.ECPModelelementContext;
 import org.unicase.ui.unicasecommon.common.util.DNDHelper;
 import org.unicase.ui.unicasecommon.diagram.util.EditPartUtility;
 

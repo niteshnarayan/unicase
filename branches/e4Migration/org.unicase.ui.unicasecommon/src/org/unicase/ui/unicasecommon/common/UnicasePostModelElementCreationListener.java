@@ -11,6 +11,7 @@ import java.util.Date;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.emfstore.client.observer.ESPostCreationObserver;
 import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
+import org.eclipse.emf.emfstore.internal.server.exceptions.AccessControlException;
 import org.unicase.model.UnicaseModelElement;
 import org.unicase.model.organization.User;
 import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
@@ -47,9 +48,7 @@ public class UnicasePostModelElementCreationListener implements
 				if (user != null) {
 					unicaseModelElement.setCreator(user.getName());
 				}
-			} catch (NoCurrentUserException e) {
-				// do nothing
-			} catch (CannotMatchUserInProjectException e) {
+			} catch (AccessControlException e) {
 				// do nothing
 			}
 		}

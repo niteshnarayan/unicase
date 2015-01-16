@@ -31,6 +31,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.unicase.model.attachment.UrlAttachment;
+import org.unicase.ui.unicasecommon.ECPModelelementContext;
 
 /**
  * GUI Control for the ME reference links.

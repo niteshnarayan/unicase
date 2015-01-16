@@ -37,6 +37,7 @@ import org.unicase.model.rationale.RationaleFactory;
 import org.unicase.model.rationale.RationalePackage;
 import org.unicase.model.rationale.impl.RationaleFactoryImpl;
 import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
+import org.unicase.ui.unicasecommon.meeditor.mecontrols.AbstractMEControl;
 import org.unicase.ui.unicasecommon.meeditor.mecontrols.AbstractUnicaseMEControl;
 
 /**
@@ -70,8 +71,10 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	/**
 	 * Method is responsible to create the assessment matrix control.
 	 * 
-	 * @param parent containing parent composite
-	 * @param style used style
+	 * @param parent
+	 *            containing parent composite
+	 * @param style
+	 *            used style
 	 * @return the corresponding control
 	 */
 	@Override
@@ -79,15 +82,17 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 
 		// check if null or not an issue
 		if (getModelElement() == null || !(getModelElement() instanceof Issue)) {
-			throw new IllegalArgumentException("Expected " + Issue.class.getCanonicalName() + ", was "
-				+ getModelElement());
+			throw new IllegalArgumentException("Expected "
+					+ Issue.class.getCanonicalName() + ", was "
+					+ getModelElement());
 		}
 		issue = (Issue) getModelElement();
 
 		// adapter factory item delegator
 
-		adapterFactoryItemDelegator = new AdapterFactoryItemDelegator(new ComposedAdapterFactory(
-			ComposedAdapterFactory.Descriptor.Registry.INSTANCE));
+		adapterFactoryItemDelegator = new AdapterFactoryItemDelegator(
+				new ComposedAdapterFactory(
+						ComposedAdapterFactory.Descriptor.Registry.INSTANCE));
 
 		// instantiate listeners
 
@@ -104,7 +109,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 			proposal.addModelElementChangeListener(proposalListener);
 			for (Assessment assessment : proposal.getAssessments()) {
 				if (issue.getCriteria().contains(assessment.getCriterion())) {
-					assessment.addModelElementChangeListener(assessmentListener);
+					assessment
+							.addModelElementChangeListener(assessmentListener);
 				}
 			}
 		}
@@ -113,7 +119,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 
 		mainComposite = parent;
 		parentStyle = style;
-		section = getToolkit().createSection(parent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
+		section = getToolkit().createSection(parent,
+				Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		section.setText("Assessment Matrix");
 		mainComposite = getToolkit().createComposite(section);
 		mainComposite.setLayout(new GridLayout(1, true));
@@ -139,7 +146,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	}
 
 	/**
-	 * used to close the control. removes all listener and closes all containing controls.
+	 * used to close the control. removes all listener and closes all containing
+	 * controls.
 	 */
 	@Override
 	public void dispose() {
@@ -157,7 +165,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 			for (Proposal proposal : issue.getProposals()) {
 				for (Assessment assessment : proposal.getAssessments()) {
 					if (issue.getCriteria().contains(assessment.getCriterion())) {
-						assessment.removeModelElementChangeListener(assessmentListener);
+						assessment
+								.removeModelElementChangeListener(assessmentListener);
 					}
 				}
 			}
@@ -179,7 +188,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 
 		if (numberOfCriteria > 0 && proposals.size() > 0) {
 			matrixSection = getToolkit().createComposite(mainComposite);
-			matrixSection.setLayout(new GridLayout(numberOfCriteria + 4, false));
+			matrixSection
+					.setLayout(new GridLayout(numberOfCriteria + 4, false));
 		} else {
 			mainComposite.layout(true);
 			section.setExpanded(false);
@@ -195,14 +205,16 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		getToolkit().createLabel(matrixSection, "");
 		getToolkit().createLabel(matrixSection, "          ");
 		for (int i = 0; i < criteria.size(); i++) {
-			final Hyperlink hyperlink = getToolkit().createHyperlink(matrixSection,
-				cutStringName(criteria.get(i).getName()), parentStyle);
+			final Hyperlink hyperlink = getToolkit().createHyperlink(
+					matrixSection, cutStringName(criteria.get(i).getName()),
+					parentStyle);
 			GridData hyperLinkGridData = new GridData(GridData.FILL_HORIZONTAL);
 			hyperLinkGridData.horizontalAlignment = GridData.HORIZONTAL_ALIGN_CENTER;
 			hyperlink.setLayoutData(hyperLinkGridData);
 			hyperlink.layout();
-			IHyperlinkListener listener = new MEHyperLinkAdapter(criteria.get(i), issue, RationalePackage.eINSTANCE
-				.getIssue_Criteria().getName());
+			IHyperlinkListener listener = new MEHyperLinkAdapter(
+					criteria.get(i), issue, RationalePackage.eINSTANCE
+							.getIssue_Criteria().getName());
 			hyperlink.addHyperlinkListener(listener);
 		}
 
@@ -213,35 +225,41 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 
 		for (int p = 0; p < proposals.size(); p++) {
 			Proposal currentProposal = proposals.get(p);
-			final Hyperlink hyperlink = getToolkit().createHyperlink(matrixSection, currentProposal.getName(),
-				parentStyle);
-			IHyperlinkListener listener = new MEHyperLinkAdapter(currentProposal, issue, RationalePackage.eINSTANCE
-				.getIssue_Proposals().getName());
+			final Hyperlink hyperlink = getToolkit().createHyperlink(
+					matrixSection, currentProposal.getName(), parentStyle);
+			IHyperlinkListener listener = new MEHyperLinkAdapter(
+					currentProposal, issue, RationalePackage.eINSTANCE
+							.getIssue_Proposals().getName());
 			hyperlink.addHyperlinkListener(listener);
 			getToolkit().createLabel(matrixSection, "     ");
 			for (int i = 0; i < criteria.size(); i++) {
 				Criterion criterion = criteria.get(i);
-				Assessment assessment = getAssessment(currentProposal, criterion);
+				Assessment assessment = getAssessment(currentProposal,
+						criterion);
 				ControlFactory cFactory = new ControlFactory();
 				final IItemPropertyDescriptor pDescriptorAssessmentValue = adapterFactoryItemDelegator
-					.getPropertyDescriptor(assessment, "value");
-				AbstractMEControl assessmentControlDescription = cFactory.createControl(pDescriptorAssessmentValue,
-					assessment);
+						.getPropertyDescriptor(assessment, "value");
+				AbstractMEControl assessmentControlDescription = cFactory
+						.createControl(pDescriptorAssessmentValue, assessment);
 				this.assessmentControls.add(assessmentControlDescription);
 
 				Composite comp = getToolkit().createComposite(matrixSection);
-				assessmentControlDescription.createControl(comp, parentStyle, pDescriptorAssessmentValue, assessment,
-					UnicaseActionHelper.getContext(issue), getToolkit());
+				assessmentControlDescription.createControl(comp, parentStyle,
+						pDescriptorAssessmentValue, assessment,
+						UnicaseActionHelper.getContext(issue), getToolkit());
 				comp.setLayout(new GridLayout(1, true));
 				GridData gridData = new GridData();
 				gridData.horizontalAlignment = GridData.HORIZONTAL_ALIGN_CENTER;
 				comp.setLayoutData(gridData);
 			}
 			getToolkit().createLabel(matrixSection, "          ");
-			Composite sumLabelComposite = getToolkit().createComposite(matrixSection);
+			Composite sumLabelComposite = getToolkit().createComposite(
+					matrixSection);
 			sumLabelComposite.setLayout(new GridLayout(1, true));
-			allSumLabels.put(currentProposal,
-				getToolkit().createLabel(sumLabelComposite, " " + computeAssessmentSum(currentProposal) + " "));
+			allSumLabels.put(
+					currentProposal,
+					getToolkit().createLabel(sumLabelComposite,
+							" " + computeAssessmentSum(currentProposal) + " "));
 			sumLabelComposite.layout();
 			allSumLabelContainer.put(currentProposal, sumLabelComposite);
 		}
@@ -269,7 +287,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 			}
 			return inputString;
 		}
-		String retValue = inputString.substring(0, MAX_LENGTH_CRITERIA_NAME - 3);
+		String retValue = inputString
+				.substring(0, MAX_LENGTH_CRITERIA_NAME - 3);
 		retValue = retValue + "...";
 		return retValue;
 	}
@@ -300,7 +319,7 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		assessmentsOfProposal = p.getAssessments();
 		for (int i = 0; i < assessmentsOfProposal.size(); i++) {
 			if (assessmentsOfProposal.get(i).getCriterion() != null
-				&& assessmentsOfProposal.get(i).getCriterion().equals(c)) {
+					&& assessmentsOfProposal.get(i).getCriterion().equals(c)) {
 				return assessmentsOfProposal.get(i);
 			}
 		}
@@ -373,11 +392,13 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int canRender(IItemPropertyDescriptor itemPropertyDescriptor, EObject modelElement) {
+	public int canRender(IItemPropertyDescriptor itemPropertyDescriptor,
+			EObject modelElement) {
 		if (!(modelElement instanceof Issue)) {
 			return DO_NOT_RENDER;
 		}
-		if (!((EReference) (itemPropertyDescriptor.getFeature(modelElement))).getName().equals("assessments")) {
+		if (!((EReference) (itemPropertyDescriptor.getFeature(modelElement)))
+				.getName().equals("assessments")) {
 			return DO_NOT_RENDER;
 		}
 
@@ -482,7 +503,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		public void onChange(Notification notification) {
 			if (notification.getNotifier() instanceof Criterion) {
 				if (notification.getFeature() instanceof EAttribute
-					&& ((EAttribute) notification.getFeature()).getName().equals("name")) {
+						&& ((EAttribute) notification.getFeature()).getName()
+								.equals("name")) {
 					Criterion c = (Criterion) notification.getNotifier();
 					if (issue != null && issue.getCriteria().contains(c)) {
 						rebuildMatrix();
@@ -517,7 +539,8 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		public void onChange(Notification notification) {
 			if (notification.getNotifier() instanceof Proposal) {
 				if (notification.getFeature() instanceof EAttribute
-					&& ((EAttribute) notification.getFeature()).getName().equals("name")) {
+						&& ((EAttribute) notification.getFeature()).getName()
+								.equals("name")) {
 					Proposal p = (Proposal) notification.getNotifier();
 					if (issue != null && issue.getProposals().contains(p)) {
 						rebuildMatrix();
@@ -551,8 +574,10 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		public void onChange(Notification notification) {
 			if ((notification.getNotifier() instanceof Assessment)) {
 				if (notification.getFeature() instanceof EAttribute
-					&& ((EAttribute) notification.getFeature()).getName().equals("value")) {
-					Assessment assessment = (Assessment) notification.getNotifier();
+						&& ((EAttribute) notification.getFeature()).getName()
+								.equals("value")) {
+					Assessment assessment = (Assessment) notification
+							.getNotifier();
 					if (assessment.getProposal().getIssue().equals(issue)) {
 						updateAssessmentSum(assessment.getProposal());
 					}

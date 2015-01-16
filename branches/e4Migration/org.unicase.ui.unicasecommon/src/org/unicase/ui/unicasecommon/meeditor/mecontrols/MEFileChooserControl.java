@@ -12,8 +12,10 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecp.internal.ui.PreferenceHelper;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.filetransfer.FileDownloadStatus;
@@ -47,6 +49,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.unicase.model.attachment.FileAttachment;
 import org.unicase.ui.unicasecommon.Activator;
+import org.unicase.ui.unicasecommon.file.util.FileTransferUtil;
 
 /**
  * This class handles file attachments. If the file attachment has no file attached yet, this control allows to attach a
