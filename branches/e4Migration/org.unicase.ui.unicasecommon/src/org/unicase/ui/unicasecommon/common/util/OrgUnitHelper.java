@@ -14,10 +14,15 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecp.core.ECPProject;
+import org.eclipse.emf.ecp.core.util.ECPUtil;
+import org.eclipse.emf.ecp.emfstore.core.internal.EMFStoreProvider;
+import org.eclipse.emf.ecp.spi.core.InternalProject;
+import org.eclipse.emf.emfstore.client.ESLocalProject;
 import org.eclipse.emf.emfstore.internal.client.accesscontrol.AccessControlHelper;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.Usersession;
-import org.eclipse.emf.emfstore.internal.client.model.Workspace;
 import org.eclipse.emf.emfstore.internal.client.model.util.WorkspaceUtil;
 import org.eclipse.emf.emfstore.internal.common.model.Project;
 import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
@@ -47,7 +52,7 @@ public final class OrgUnitHelper {
 	/**
 	 * Returns the current User in the project, whos logged in.
 	 * 
-	 * @param currentWorkspace
+	 * @param modelElement
 	 *            the current workspace
 	 * @return The current user
 	 * @throws NoCurrentUserException
@@ -55,15 +60,17 @@ public final class OrgUnitHelper {
 	 * @throws CannotMatchUserInProjectException
 	 *             if the current user cannot be found in the current project
 	 */
-	public static User getCurrentUser(Workspace currentWorkspace)
+	public static User getCurrentUser(EObject modelElement)
 			throws AccessControlException {
 		try {
-			ProjectSpace activeProjectSpace = (ProjectSpace) ECPWorkspaceManager
-					.getInstance().getWorkSpace().getActiveProject()
-					.getRootObject();
-			if (activeProjectSpace == null) {
-				throw new NoCurrentUserException();
+			ECPProject project = ECPUtil.getECPProjectManager().getProject(
+					modelElement);
+			final ESLocalProject localProject = EMFStoreProvider.INSTANCE
+					.getProjectSpace((InternalProject) project);
+			if (localProject.getUsersession() == null) {
+				return null;
 			}
+			localProject.getUsersession().
 			return getUser(activeProjectSpace);
 		} catch (NoWorkspaceException e) {
 			ModelUtil.logException("Retrieving current user failed!", e);

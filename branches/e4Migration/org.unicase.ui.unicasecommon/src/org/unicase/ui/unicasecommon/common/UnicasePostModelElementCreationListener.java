@@ -10,7 +10,6 @@ import java.util.Date;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.emfstore.client.observer.ESPostCreationObserver;
-import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
 import org.eclipse.emf.emfstore.internal.server.exceptions.AccessControlException;
 import org.unicase.model.UnicaseModelElement;
 import org.unicase.model.organization.User;
@@ -43,8 +42,7 @@ public class UnicasePostModelElementCreationListener implements
 			User user;
 
 			try {
-				user = OrgUnitHelper.getCurrentUser(ESWorkspaceProviderImpl
-						.getInstance().getInternalWorkspace());
+				user = OrgUnitHelper.getCurrentUser(modelElement);
 				if (user != null) {
 					unicaseModelElement.setCreator(user.getName());
 				}
