@@ -15,6 +15,7 @@ import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.common.model.EMFStoreProperty;
+import org.eclipse.emf.emfstore.internal.server.model.versioning.ChangePackage;
 import org.eclipse.emf.emfstore.internal.server.model.versioning.operations.OperationId;
 import org.unicase.dashboard.DashboardNotification;
 import org.unicase.dashboard.DashboardNotificationComposite;
@@ -59,13 +60,14 @@ public class PushedNotificationProvider implements NotificationProvider {
 	 * @see org.unicase.workspace.notification.NotificationProvider#provideNotifications(org.unicase.workspace.ProjectSpace,
 	 *      java.util.List, java.lang.String)
 	 */
-	public List<DashboardNotification> provideNotifications(ProjectSpace projectSpace,
-		List<ChangePackage> changePackages) {
+	public List<DashboardNotification> provideNotifications(
+			ProjectSpace projectSpace, List<ChangePackage> changePackages) {
 		List<DashboardNotification> result = new ArrayList<DashboardNotification>();
 
 		try {
 			User currentUser = OrgUnitHelper.getUser(projectSpace);
-			return provideNotifications(projectSpace, changePackages, currentUser.getName());
+			return provideNotifications(projectSpace, changePackages,
+					currentUser.getName());
 		} catch (NoCurrentUserException e) {
 			return result;
 		} catch (CannotMatchUserInProjectException e) {
@@ -79,8 +81,9 @@ public class PushedNotificationProvider implements NotificationProvider {
 	 * @see org.unicase.workspace.notification.NotificationProvider#provideNotifications(org.unicase.workspace.ProjectSpace,
 	 *      java.util.List, java.lang.String)
 	 */
-	public List<DashboardNotification> provideNotifications(ProjectSpace projectSpace,
-		List<ChangePackage> changePackages, String username) {
+	public List<DashboardNotification> provideNotifications(
+			ProjectSpace projectSpace, List<ChangePackage> changePackages,
+			String username) {
 		// sanity checks
 		List<DashboardNotification> result = new ArrayList<DashboardNotification>();
 		if (projectSpace == null || username == null) {
@@ -94,25 +97,31 @@ public class PushedNotificationProvider implements NotificationProvider {
 			return result;
 		}
 
-		EMFStoreProperty property = projectSpace.getPropertyManager().getLocalProperty(
-			DashboardPropertyKeys.NOTIFICATION_COMPOSITE);
+		EMFStoreProperty property = projectSpace.getPropertyManager()
+				.getLocalProperty(DashboardPropertyKeys.NOTIFICATION_COMPOSITE);
 		if (property != null) {
-			DashboardNotificationComposite notificationComposite = (DashboardNotificationComposite) property.getValue();
-			for (DashboardNotification notification : notificationComposite.getNotifications()) {
-				if (notification.getRecipient().equals(user.getName()) && notification.getProvider() == null) {
+			DashboardNotificationComposite notificationComposite = (DashboardNotificationComposite) property
+					.getValue();
+			for (DashboardNotification notification : notificationComposite
+					.getNotifications()) {
+				if (notification.getRecipient().equals(user.getName())
+						&& notification.getProvider() == null) {
 					notification.setProvider(getName());
 					result.add(notification);
-					getExcludedOperations().addAll(notification.getRelatedOperations());
+					getExcludedOperations().addAll(
+							notification.getRelatedOperations());
 				} else {
 					EList<Group> groups = new BasicEList<Group>();
-					projectSpace.getProject().getAllModelElementsbyClass(OrganizationPackage.eINSTANCE.getGroup(),
-						groups);
+					projectSpace.getProject().getAllModelElementsbyClass(
+							OrganizationPackage.eINSTANCE.getGroup(), groups);
 					for (Group group : groups) {
-						if (group.getName().equals(notification.getRecipient()) && group.getOrgUnits().contains(user)
-							&& notification.getProvider() == null) {
+						if (group.getName().equals(notification.getRecipient())
+								&& group.getOrgUnits().contains(user)
+								&& notification.getProvider() == null) {
 							notification.setProvider(getName());
 							result.add(notification);
-							getExcludedOperations().addAll(notification.getRelatedOperations());
+							getExcludedOperations().addAll(
+									notification.getRelatedOperations());
 						}
 					}
 				}

@@ -496,13 +496,12 @@
          categoryId="org.unicase.ui.diagram.activityDiagram.part.ModelDiagramEditorID"
          defaultHandler="org.unicase.ui.diagram.activityDiagram.part.LoadResourceAction"/>
    </extension>
-
    <extension
-         point="org.eclipse.emf.ecp.common.modelelementopener">
-      <ModelElementOpener
-            class="org.unicase.ui.activityDiagram.ActivityDiagramOpener"
+         point="org.eclipse.emf.ecp.ui.modelElementOpener">
+      <modelElementOpener
+              class="org.unicase.ui.activityDiagram.ActivityDiagramOpener"
             name="org.unicase.ui.MEDiagramEditor">
-      </ModelElementOpener>
+      </modelElementOpener>
    </extension>
 
    <!-- optionally, specify keybindings -->

@@ -39,14 +39,16 @@ public class ShowDashboardHandler extends AbstractHandler {
 
 		ProjectSpace projectSpace = null;
 		try {
-			Object o = HandlerUtil.getVariableChecked(event, DASHBOARD_CONTEXT_VARIABLE);
+			Object o = HandlerUtil.getVariableChecked(event,
+					DASHBOARD_CONTEXT_VARIABLE);
 			projectSpace = (ProjectSpace) o;
 		} catch (ExecutionException e) {
 			try {
-				projectSpace = (ProjectSpace) ECPWorkspaceManager.getInstance().getWorkSpace().getActiveProject()
-					.getRootObject();
+				projectSpace = (ProjectSpace) ECPWorkspaceManager.getInstance()
+						.getWorkSpace().getActiveProject().getRootObject();
 			} catch (NoWorkspaceException e1) {
-				ModelUtil.logException("Failed to show dashboard: No workspace!", e1);
+				ModelUtil.logException(
+						"Failed to show dashboard: No workspace!", e1);
 			}
 		}
 
@@ -57,8 +59,10 @@ public class ShowDashboardHandler extends AbstractHandler {
 
 		if (projectSpace.getUsersession() == null) {
 			// do not open when the project is not shared yet
-			MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "No dashboard available",
-				"You can't open the dashboard because your project is not shared yet");
+			MessageDialog
+					.openWarning(Display.getCurrent().getActiveShell(),
+							"No dashboard available",
+							"You can't open the dashboard because your project is not shared yet");
 			return null;
 		}
 
@@ -69,8 +73,9 @@ public class ShowDashboardHandler extends AbstractHandler {
 			protected void doRun() {
 				DashboardEditorInput input = new DashboardEditorInput(ps);
 				try {
-					IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-						.openEditor(input, DASHBOARD_ID, true);
+					IEditorPart openEditor = PlatformUI.getWorkbench()
+							.getActiveWorkbenchWindow().getActivePage()
+							.openEditor(input, DASHBOARD_ID, true);
 					if (openEditor instanceof DashboardEditor) {
 						((DashboardEditor) openEditor).refresh();
 					}

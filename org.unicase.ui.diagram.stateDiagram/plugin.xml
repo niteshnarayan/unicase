@@ -476,12 +476,12 @@
    <extension point="org.eclipse.ui.handlers" id="menu-handlers">
       <?gmfgen generated="true"?>
    </extension>
-    <extension
-         point="org.eclipse.emf.ecp.common.modelelementopener">
-      <ModelElementOpener
-            class="org.unicase.ui.stateDiagram.StateDiagramOpener"
+      <extension
+         point="org.eclipse.emf.ecp.ui.modelElementOpener">
+      <modelElementOpener
+      class="org.unicase.ui.stateDiagram.StateDiagramOpener"
             name="org.unicase.ui.MEDiagramEditor">
-      </ModelElementOpener>
+      </modelElementOpener>
    </extension>
 
    <!-- optionally, specify keybindings -->
