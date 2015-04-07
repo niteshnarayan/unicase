@@ -1,5 +1,5 @@
 /**
- * <copyright> Copyright (c) 2009-2012 Chair of Applied Software Engineering, Technische Universität München (TUM).
+ * <copyright> Copyright (c) 2009-2012 Chair of Applied Software Engineering, Technische Universitï¿½t Mï¿½nchen (TUM).
  * All rights reserved. This program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html </copyright>
@@ -15,20 +15,12 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecp.common.model.ECPWorkspaceManager;
-import org.eclipse.emf.ecp.common.model.ModelElementContextListener;
-import org.eclipse.emf.ecp.common.model.NoWorkspaceException;
-import org.eclipse.emf.ecp.common.model.workSpaceModel.ECPProject;
-import org.eclipse.emf.ecp.common.model.workSpaceModel.ECPWorkspace;
-import org.eclipse.emf.ecp.common.util.UiUtil;
-import org.eclipse.emf.ecp.common.utilities.CannotMatchUserInProjectException;
-import org.eclipse.emf.emfstore.client.model.ProjectSpace;
-import org.eclipse.emf.emfstore.client.model.WorkspaceManager;
-import org.eclipse.emf.emfstore.client.model.exceptions.NoCurrentUserException;
-import org.eclipse.emf.emfstore.common.model.IdEObjectCollection;
-import org.eclipse.emf.emfstore.common.model.Project;
-import org.eclipse.emf.emfstore.common.model.util.IdEObjectCollectionChangeObserver;
-import org.eclipse.emf.emfstore.common.model.util.ModelUtil;
+import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
+import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
+import org.eclipse.emf.emfstore.internal.client.model.Workspace;
+import org.eclipse.emf.emfstore.internal.common.model.IdEObjectCollection;
+import org.eclipse.emf.emfstore.internal.common.model.Project;
+import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.GroupMarker;
@@ -64,6 +56,7 @@ import org.unicase.ui.tableview.viewer.METableViewer;
 import org.unicase.ui.taskview.filters.BlockedElementsViewerFilter;
 import org.unicase.ui.taskview.filters.ResolvedBugReportFilter;
 import org.unicase.ui.taskview.filters.UncheckedElementsViewerFilter;
+import org.unicase.ui.unicasecommon.ModelElementContextListener;
 import org.unicase.ui.unicasecommon.common.filter.UserFilter;
 import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
 import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
@@ -74,10 +67,12 @@ import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
  * @author Florian Schneider
  * @author Zardosht Hodaie
  */
-public class TaskView extends ViewPart implements IdEObjectCollectionChangeObserver {
+public class TaskView extends ViewPart
+		implements
+		org.eclipse.emf.emfstore.internal.common.model.util.IdEObjectCollectionChangeObserver {
 
 	private METableViewer viewer;
-	private ECPWorkspace workspace;
+	private Workspace workspace;
 	private Project activeProject;
 	private TaskViewSelectionListener selectionListener;
 	private TaskViewContextListener contextListener;
@@ -118,12 +113,8 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 
 		viewer = initMETableViewer(parent);
 
-		try {
-			workspace = ECPWorkspaceManager.getInstance().getWorkSpace();
-		} catch (NoWorkspaceException e) {
-			ModelUtil.logException("Failed to receive Project!", e);
-			return;
-		}
+		workspace = ESWorkspaceProviderImpl.getInstance()
+				.getInternalWorkspace();
 
 		selectionListener = new TaskViewSelectionListener();
 		contextListener = new TaskViewContextListener();
@@ -135,12 +126,13 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 		getSite().setSelectionProvider(viewer.getTableViewer());
 		hookDoubleClickAction();
 
-		if (workspace.getActiveProject() != null) {
-			activeProject = (Project) workspace.getActiveProject().getRootContainer();
+		if (ModelUtil.getProject((EObject) parent) != null) {
+			activeProject = ModelUtil.getProject((EObject) parent);
 			activeProject.addIdEObjectCollectionChangeObserver(this);
 			VISITED_PROJECTS.add(activeProject);
 
-			ECPWorkspaceManager.getECPProject(activeProject).addModelElementContextListener(contextListener);
+			ECPWorkspaceManager.getECPProject(activeProject)
+					.addModelElementContextListener(contextListener);
 		}
 		initLoggedInUser();
 		viewer.setInput(activeProject);
@@ -161,14 +153,16 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			@Override
 			public void run() {
 				List<User> users = new ArrayList<User>();
-				List<User> projectUsers = activeProject.getAllModelElementsbyClass(
-					OrganizationPackage.eINSTANCE.getUser(), new BasicEList<User>());
+				List<User> projectUsers = activeProject
+						.getAllModelElementsbyClass(
+								OrganizationPackage.eINSTANCE.getUser(),
+								new BasicEList<User>());
 				users.addAll(projectUsers);
 				User noUser = OrganizationFactory.eINSTANCE.createUser();
 				noUser.setName("[no user]");
 				users.add(noUser);
-				Object[] userArray = UiUtil.showMESelectionDialog(TaskView.this.getSite().getShell(), users,
-					"Select user", false);
+				Object[] userArray = UiUtil.showMESelectionDialog(TaskView.this
+						.getSite().getShell(), users, "Select user", false);
 				if (userArray.length > 0) {
 					selectedUser = (User) userArray[0];
 					if (selectedUser.getName().equals("[no user]")) {
@@ -176,23 +170,29 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 					}
 					setUserFilter(true, selectedUser);
 					setTeamFilter(filterToTeam.isChecked());
-					setResolvedBugReportsFilter(filterResolvedBugReports.isChecked(), selectedUser);
+					setResolvedBugReportsFilter(
+							filterResolvedBugReports.isChecked(), selectedUser);
 					filterToLoggedInUser.setChecked(false);
 				}
 			}
 		};
 		filterToSelectedUser.setText("Filter to user...");
-		filterToSelectedUser.setToolTipText("Select a user to filter to his/her tasks.");
-		filterToSelectedUser.setImageDescriptor(Activator.getImageDescriptor("/icons/User.gif"));
+		filterToSelectedUser
+				.setToolTipText("Select a user to filter to his/her tasks.");
+		filterToSelectedUser.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/User.gif"));
 		menuManager.add(filterToSelectedUser);
-		ControlContribution userTextToolbarContribution = new ControlContribution("userTextl") {
+		ControlContribution userTextToolbarContribution = new ControlContribution(
+				"userTextl") {
 
 			@Override
 			protected Control createControl(Composite parent) {
 				Composite composite = new Composite(parent, SWT.NONE);
-				GridLayoutFactory.fillDefaults().margins(1, 0).spacing(0, 0).applyTo(composite);
+				GridLayoutFactory.fillDefaults().margins(1, 0).spacing(0, 0)
+						.applyTo(composite);
 				txtUser = new Text(composite, SWT.NONE);
-				GridData layoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+				GridData layoutData = new GridData(SWT.FILL, SWT.CENTER, true,
+						true);
 				layoutData.widthHint = 100;
 				txtUser.setLayoutData(layoutData);
 				txtUser.setEditable(false);
@@ -222,23 +222,28 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 		filterToBlocked.setText("Show blocked");
 		menuManager.add(filterToBlocked);
 
-		Separator taskviewFiltersSeperator = new Separator(TASKVIEW_FILTERS_GROUP);
+		Separator taskviewFiltersSeperator = new Separator(
+				TASKVIEW_FILTERS_GROUP);
 		toolbarManager.add(taskviewFiltersSeperator);
 
-		toolbarManager.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
+		toolbarManager.add(new GroupMarker(
+				IWorkbenchActionConstants.MB_ADDITIONS));
 		Separator separator2 = new Separator("separator2");
-		toolbarManager.insertAfter(IWorkbenchActionConstants.MB_ADDITIONS, separator2);
+		toolbarManager.insertAfter(IWorkbenchActionConstants.MB_ADDITIONS,
+				separator2);
 
 		Action showHideColumnsAction = new Action() {
 			@Override
 			public void run() {
-				List<String> columnsToShow = viewer.displayShowHideColumnsDialog();
+				List<String> columnsToShow = viewer
+						.displayShowHideColumnsDialog();
 				viewer.showColumns(columnsToShow);
 			}
 
 		};
 		showHideColumnsAction.setToolTipText("Show/Hide columns");
-		showHideColumnsAction.setImageDescriptor(Activator.getImageDescriptor("/icons/table.png"));
+		showHideColumnsAction.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/table.png"));
 		toolbarManager.add(showHideColumnsAction);
 	}
 
@@ -252,9 +257,12 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			}
 
 		};
-		filterToBlocked.setImageDescriptor(Activator.getImageDescriptor("/icons/blocked.gif"));
-		filterToBlocked.setToolTipText("Besides the unblocked elements, the blocked ones will be shown as well.");
-		Boolean blockedFilterCheckState = Boolean.parseBoolean(getDialogSettings().get("BlockedFilter"));
+		filterToBlocked.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/blocked.gif"));
+		filterToBlocked
+				.setToolTipText("Besides the unblocked elements, the blocked ones will be shown as well.");
+		Boolean blockedFilterCheckState = Boolean
+				.parseBoolean(getDialogSettings().get("BlockedFilter"));
 		filterToBlocked.setChecked(blockedFilterCheckState);
 		setBlockedFilter(blockedFilterCheckState);
 
@@ -269,9 +277,12 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			}
 
 		};
-		filterToUnchecked.setImageDescriptor(Activator.getImageDescriptor("/icons/tick.png"));
-		filterToUnchecked.setToolTipText("Besides the unchecked elements, the checked ones will be shown as well.");
-		Boolean uncheckedFilterCheckState = Boolean.parseBoolean(getDialogSettings().get("UncheckedFilter"));
+		filterToUnchecked.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/tick.png"));
+		filterToUnchecked
+				.setToolTipText("Besides the unchecked elements, the checked ones will be shown as well.");
+		Boolean uncheckedFilterCheckState = Boolean
+				.parseBoolean(getDialogSettings().get("UncheckedFilter"));
 		filterToUnchecked.setChecked(uncheckedFilterCheckState);
 		setUncheckedFilter(uncheckedFilterCheckState);
 
@@ -288,9 +299,12 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			}
 
 		};
-		filterToLoggedInUser.setImageDescriptor(Activator.getImageDescriptor("/icons/filtertouser.png"));
-		filterToLoggedInUser.setToolTipText("Restricts the displayed table items to items owned by the current user.");
-		boolean userFilterCheckState = getDialogSettings().getBoolean("UserFilter");
+		filterToLoggedInUser.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/filtertouser.png"));
+		filterToLoggedInUser
+				.setToolTipText("Restricts the displayed table items to items owned by the current user.");
+		boolean userFilterCheckState = getDialogSettings().getBoolean(
+				"UserFilter");
 		filterToLoggedInUser.setChecked(userFilterCheckState);
 
 		//
@@ -309,15 +323,20 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			}
 
 		};
-		filterResolvedBugReports.setImageDescriptor(Activator.getImageDescriptor("/icons/Bug_resolved.png"));
-		filterResolvedBugReports.setToolTipText("Show/Hide resolved bug reports.");
+		filterResolvedBugReports.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/Bug_resolved.png"));
+		filterResolvedBugReports
+				.setToolTipText("Show/Hide resolved bug reports.");
 		Boolean resolvedBugReportsCheckState = Boolean
-			.parseBoolean(getDialogSettings().get("ResolvedBugReportsFilter"));
+				.parseBoolean(getDialogSettings().get(
+						"ResolvedBugReportsFilter"));
 		filterResolvedBugReports.setChecked(resolvedBugReportsCheckState);
 		if (loggedInUser != null && filterToSelectedUser.isChecked()) {
-			setResolvedBugReportsFilter(resolvedBugReportsCheckState, loggedInUser);
+			setResolvedBugReportsFilter(resolvedBugReportsCheckState,
+					loggedInUser);
 		} else {
-			setResolvedBugReportsFilter(resolvedBugReportsCheckState, selectedUser);
+			setResolvedBugReportsFilter(resolvedBugReportsCheckState,
+					selectedUser);
 		}
 
 		//
@@ -335,9 +354,12 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			}
 
 		};
-		filterToTeam.setImageDescriptor(Activator.getImageDescriptor("/icons/filtertomyteam.png"));
-		filterToTeam.setToolTipText("Show/Hide items owned by the current user's teammates.");
-		Boolean teamFilterCeckState = Boolean.parseBoolean(getDialogSettings().get("TeamFilter"));
+		filterToTeam.setImageDescriptor(Activator
+				.getImageDescriptor("/icons/filtertomyteam.png"));
+		filterToTeam
+				.setToolTipText("Show/Hide items owned by the current user's teammates.");
+		Boolean teamFilterCeckState = Boolean.parseBoolean(getDialogSettings()
+				.get("TeamFilter"));
 		filterToTeam.setChecked(teamFilterCeckState);
 		if (loggedInUser != null && filterToLoggedInUser.isChecked()) {
 			setTeamFilter(teamFilterCeckState);
@@ -370,54 +392,67 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 		final Action doubleClickAction = new Action() {
 			@Override
 			public void run() {
-				UnicaseActionHelper.openModelElement(UiUtil.getSelectedModelelement(), TaskView.class.getName());
+				UnicaseActionHelper.openModelElement(
+						UiUtil.getSelectedModelelement(),
+						TaskView.class.getName());
 			}
 		};
 		viewer.setDoubleClickAction(doubleClickAction);
 	}
 
 	private METableViewer initMETableViewer(Composite parent) {
-		METableViewer metv = new METableViewer(parent, TaskPackage.eINSTANCE.getCheckable());
+		METableViewer metv = new METableViewer(parent,
+				TaskPackage.eINSTANCE.getCheckable());
 		List<METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>> features = new ArrayList<METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>>();
 		// features.add(TaskPackage.Literals.CHECKABLE__CHECKED);
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			ModelPackage.Literals.UNICASE_MODEL_ELEMENT__STATE, null));
+				ModelPackage.Literals.UNICASE_MODEL_ELEMENT__STATE, null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			ModelPackage.Literals.UNICASE_MODEL_ELEMENT__NAME, null));
+				ModelPackage.Literals.UNICASE_MODEL_ELEMENT__NAME, null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			TaskPackage.Literals.WORK_ITEM__ASSIGNEE, null));
+				TaskPackage.Literals.WORK_ITEM__ASSIGNEE, null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			ModelPackage.Literals.UNICASE_MODEL_ELEMENT__CREATION_DATE, null));
+				ModelPackage.Literals.UNICASE_MODEL_ELEMENT__CREATION_DATE,
+				null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			ModelPackage.Literals.UNICASE_MODEL_ELEMENT__CREATOR, null));
+				ModelPackage.Literals.UNICASE_MODEL_ELEMENT__CREATOR, null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			TaskPackage.Literals.WORK_ITEM__CONTAINING_WORKPACKAGE, null));
+				TaskPackage.Literals.WORK_ITEM__CONTAINING_WORKPACKAGE, null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			TaskPackage.Literals.WORK_ITEM__DUE_DATE, null));
+				TaskPackage.Literals.WORK_ITEM__DUE_DATE, null));
 		features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-			TaskPackage.Literals.WORK_ITEM__PRIORITY, new IntegerEditingSupport(metv.getTableViewer(),
-				TaskPackage.Literals.WORK_ITEM__PRIORITY)));
-		// features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-		// TaskPackage.Literals.WORK_ITEM__ESTIMATE, new IntegerEditingSupport(metv.getTableViewer(),
+				TaskPackage.Literals.WORK_ITEM__PRIORITY,
+				new IntegerEditingSupport(metv.getTableViewer(),
+						TaskPackage.Literals.WORK_ITEM__PRIORITY)));
+		// features.add(new
+		// METableViewer.FeatureEditignSupportPair<EStructuralFeature,
+		// EditingSupport>(
+		// TaskPackage.Literals.WORK_ITEM__ESTIMATE, new
+		// IntegerEditingSupport(metv.getTableViewer(),
 		// TaskPackage.Literals.WORK_ITEM__ESTIMATE)));
-		// features.add(new METableViewer.FeatureEditignSupportPair<EStructuralFeature, EditingSupport>(
-		// TaskPackage.Literals.WORK_ITEM__EFFORT, new IntegerEditingSupport(metv.getTableViewer(),
+		// features.add(new
+		// METableViewer.FeatureEditignSupportPair<EStructuralFeature,
+		// EditingSupport>(
+		// TaskPackage.Literals.WORK_ITEM__EFFORT, new
+		// IntegerEditingSupport(metv.getTableViewer(),
 		// TaskPackage.Literals.WORK_ITEM__EFFORT)));
 
 		metv.createColumnsWithEditingSupport(features);
 
 		doneOrResolvedLabelProvider = new WorkItemDoneOrResolvedLabelProvider();
 		doneOrResolvedLabelProvider.setCurrentUser(loggedInUser);
-		doneOrResolvedEditingSupport = new WorkItemDoneOrResolvedEditingSupport(metv.getTableViewer(), loggedInUser);
-		metv.addCustomColumn(0, "Done/Resolved", 100, SWT.CENTER, false, doneOrResolvedLabelProvider,
-			doneOrResolvedEditingSupport);
+		doneOrResolvedEditingSupport = new WorkItemDoneOrResolvedEditingSupport(
+				metv.getTableViewer(), loggedInUser);
+		metv.addCustomColumn(0, "Done/Resolved", 100, SWT.CENTER, false,
+				doneOrResolvedLabelProvider, doneOrResolvedEditingSupport);
 		return metv;
 	}
 
 	private void initLoggedInUser() {
 		if (activeProject != null) {
 			try {
-				loggedInUser = OrgUnitHelper.getUser(WorkspaceManager.getProjectSpace(activeProject));
+				loggedInUser = OrgUnitHelper.getUser(WorkspaceManager
+						.getProjectSpace(activeProject));
 			} catch (NoCurrentUserException e) {
 				loggedInUser = null;
 			} catch (CannotMatchUserInProjectException e) {
@@ -454,7 +489,8 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			if (filterToLoggedInUser.isChecked()) {
 				setTeamFilter(filterToTeam.isChecked());
 				setUserFilter(true, loggedInUser);
-				setResolvedBugReportsFilter(filterResolvedBugReports.isChecked(), loggedInUser);
+				setResolvedBugReportsFilter(
+						filterResolvedBugReports.isChecked(), loggedInUser);
 			}
 
 		}
@@ -466,10 +502,13 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	 * 
 	 * @see org.unicase.metamodel.util.ProjectChangeObserver#modelElementAdded(org.unicase.metamodel.Project,
 	 *      org.unicase.model.UnicaseModelElement)
-	 * @param project the project
-	 * @param modelElement the model element
+	 * @param project
+	 *            the project
+	 * @param modelElement
+	 *            the model element
 	 */
-	public void modelElementAdded(IdEObjectCollection project, EObject modelElement) {
+	public void modelElementAdded(IdEObjectCollection project,
+			EObject modelElement) {
 		if (modelElement instanceof Checkable) {
 			viewer.refresh();
 		}
@@ -480,26 +519,35 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	 * 
 	 * @see org.unicase.metamodel.util.ProjectChangeObserver#modelElementDeleteCompleted(org.unicase.model.UnicaseModelElement)
 	 *      {@inheritDoc}
-	 * @param project the project
-	 * @param modelElement the model element
+	 * @param project
+	 *            the project
+	 * @param modelElement
+	 *            the model element
 	 */
-	public void modelElementRemoved(IdEObjectCollection project, EObject modelElement) {
+	public void modelElementRemoved(IdEObjectCollection project,
+			EObject modelElement) {
 		if (modelElement instanceof Checkable) {
 			viewer.refresh();
 		}
 	}
 
 	/**
-	 * Refresh the view if a work item if notify has been called. Notify gets called when the model element has been
-	 * changed or the container of the ME has been changed. y * @see
-	 * org.unicase.model.util.ProjectChangeObserver#notify(org.eclipse.emf.common.notify.Notification,
-	 * org.unicase.model.Project, org.unicase.model.ModelElement)
+	 * Refresh the view if a work item if notify has been called. Notify gets
+	 * called when the model element has been changed or the container of the ME
+	 * has been changed. y * @see
+	 * org.unicase.model.util.ProjectChangeObserver#notify
+	 * (org.eclipse.emf.common.notify.Notification, org.unicase.model.Project,
+	 * org.unicase.model.ModelElement)
 	 * 
-	 * @param notification the notification
-	 * @param project the project
-	 * @param modelElement the model element
+	 * @param notification
+	 *            the notification
+	 * @param project
+	 *            the project
+	 * @param modelElement
+	 *            the model element
 	 */
-	public void notify(Notification notification, IdEObjectCollection project, EObject modelElement) {
+	public void notify(Notification notification, IdEObjectCollection project,
+			EObject modelElement) {
 		if (modelElement instanceof Checkable) {
 			viewer.refresh();
 		}
@@ -508,7 +556,8 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	/**
 	 * Sets the blocked filter.
 	 * 
-	 * @param checked if the blocked filter is activated.
+	 * @param checked
+	 *            if the blocked filter is activated.
 	 */
 	protected void setBlockedFilter(boolean checked) {
 		if (!checked) {
@@ -534,8 +583,10 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	/**
 	 * sets the resolved bug report filter.
 	 * 
-	 * @param checked if resolved bug reports are filtered.
-	 * @param user user
+	 * @param checked
+	 *            if resolved bug reports are filtered.
+	 * @param user
+	 *            user
 	 */
 	protected void setResolvedBugReportsFilter(boolean checked, User user) {
 		if (!checked) {
@@ -548,13 +599,15 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 				viewer.removeFilter(resolvedBugReportFilter);
 			}
 		}
-		getDialogSettings().put("ResolvedBugReportsFilter", filterResolvedBugReports.isChecked());
+		getDialogSettings().put("ResolvedBugReportsFilter",
+				filterResolvedBugReports.isChecked());
 	}
 
 	/**
 	 * Sets the teamfilter.
 	 * 
-	 * @param checked if filtered
+	 * @param checked
+	 *            if filtered
 	 */
 	protected void setTeamFilter(boolean checked) {
 
@@ -570,7 +623,8 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	/**
 	 * sets the uncheckd filter.
 	 * 
-	 * @param checked if filtered
+	 * @param checked
+	 *            if filtered
 	 */
 	protected void setUncheckedFilter(boolean checked) {
 		if (!checked) {
@@ -578,15 +632,18 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 		} else {
 			viewer.removeFilter(uncheckedFilter);
 		}
-		getDialogSettings().put("UncheckedFilter", filterToUnchecked.isChecked());
+		getDialogSettings().put("UncheckedFilter",
+				filterToUnchecked.isChecked());
 
 	}
 
 	/**
 	 * sets the userfilter.
 	 * 
-	 * @param checked if fileterd.
-	 * @param user to which must be filtered
+	 * @param checked
+	 *            if fileterd.
+	 * @param user
+	 *            to which must be filtered
 	 */
 	protected void setUserFilter(boolean checked, User user) {
 		updateLabelProvider(user);
@@ -644,7 +701,8 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	}
 
 	/**
-	 * Selection listener that will update the active project based on the current user selection.
+	 * Selection listener that will update the active project based on the
+	 * current user selection.
 	 * 
 	 * @author mharut
 	 */
@@ -679,10 +737,12 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 			activeProject = project;
 
 			if (!VISITED_PROJECTS.contains(activeProject)) {
-				activeProject.addIdEObjectCollectionChangeObserver(TaskView.this);
+				activeProject
+						.addIdEObjectCollectionChangeObserver(TaskView.this);
 				VISITED_PROJECTS.add(activeProject);
 
-				ECPWorkspaceManager.getECPProject(activeProject).addModelElementContextListener(contextListener);
+				ECPWorkspaceManager.getECPProject(activeProject)
+						.addModelElementContextListener(contextListener);
 			}
 			initLoggedInUser();
 			viewer.setInput(activeProject);
@@ -690,7 +750,8 @@ public class TaskView extends ViewPart implements IdEObjectCollectionChangeObser
 	}
 
 	/**
-	 * Model element context listener that will remove the current input, if the project gets deleted.
+	 * Model element context listener that will remove the current input, if the
+	 * project gets deleted.
 	 * 
 	 * @author mharut
 	 */

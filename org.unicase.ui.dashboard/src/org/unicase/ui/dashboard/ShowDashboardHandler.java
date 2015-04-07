@@ -9,11 +9,15 @@ package org.unicase.ui.dashboard;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.emf.ecp.emfstore.core.internal.EMFStoreProvider;
+import org.eclipse.emf.ecp.spi.core.InternalProject;
+import org.eclipse.emf.emfstore.client.ESLocalProject;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.util.EMFStoreCommand;
 import org.eclipse.emf.emfstore.internal.client.model.util.WorkspaceUtil;
-import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -38,18 +42,13 @@ public class ShowDashboardHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 
 		ProjectSpace projectSpace = null;
-		try {
-			Object o = HandlerUtil.getVariableChecked(event,
-					DASHBOARD_CONTEXT_VARIABLE);
-			projectSpace = (ProjectSpace) o;
-		} catch (ExecutionException e) {
-			try {
-				projectSpace = (ProjectSpace) ECPWorkspaceManager.getInstance()
-						.getWorkSpace().getActiveProject().getRootObject();
-			} catch (NoWorkspaceException e1) {
-				ModelUtil.logException(
-						"Failed to show dashboard: No workspace!", e1);
-			}
+		final ISelection selection = HandlerUtil.getActiveMenuSelection(event);
+		final IStructuredSelection ssel = (IStructuredSelection) selection;
+		((ECPProject) ssel).
+		final ESLocalProject localProject = EMFStoreProvider.INSTANCE
+				.getProjectSpace((ECPProject) project);
+		if (localProject.getUsersession() == null) {
+			return null;
 		}
 
 		if (projectSpace == null) {

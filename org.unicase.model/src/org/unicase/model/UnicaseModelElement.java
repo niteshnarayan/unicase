@@ -10,6 +10,7 @@ import java.util.Date;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecp.view.spi.model.ModelChangeListener;
 import org.eclipse.emf.emfstore.internal.common.model.ModelElementId;
 import org.unicase.model.document.LeafSection;
 import org.unicase.model.profile.StereotypeInstance;
@@ -300,22 +301,21 @@ public interface UnicaseModelElement extends EObject {
 
 	// begin custom code
 
-	// /**
-	// * Add a model element change listener.
-	// *
-	// * @param listener
-	// * listener to add.
-	// */
-	// void addModelElementChangeListener(ModelElementChangeListener listener);
-	//
-	// /**
-	// * Remove a model element change listener.
-	// *
-	// * @param listener
-	// * the listener to remove
-	// */
-	// void removeModelElementChangeListener(ModelElementChangeListener
-	// listener);
+	/**
+	 * Add a model element change listener.
+	 *
+	 * @param listener
+	 *            listener to add.
+	 */
+	void addModelElementChangeListener(ModelChangeListener listener);
+
+	/**
+	 * Remove a model element change listener.
+	 *
+	 * @param listener
+	 *            the listener to remove
+	 */
+	void removeModelElementChangeListener(ModelChangeListener listener);
 
 	/**
 	 * Returns the ID of this model element.

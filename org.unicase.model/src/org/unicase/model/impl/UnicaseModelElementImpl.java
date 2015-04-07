@@ -9,6 +9,7 @@ package org.unicase.model.impl;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -24,6 +25,8 @@ import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.EObjectResolvingEList;
 import org.eclipse.emf.ecore.util.EObjectWithInverseResolvingEList;
 import org.eclipse.emf.ecore.util.InternalEList;
+import org.eclipse.emf.ecp.view.spi.model.ModelChangeListener;
+import org.eclipse.emf.ecp.view.spi.model.ModelChangeNotification;
 import org.eclipse.emf.emfstore.internal.common.model.ModelElementId;
 import org.eclipse.emf.emfstore.internal.common.model.Project;
 import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
@@ -78,11 +81,11 @@ public abstract class UnicaseModelElementImpl extends EObjectImpl implements
 
 	private AdapterImpl internalChangeListener;
 
-	// private List<ModelElementChangeListener> changeListeners;
+	private List<ModelChangeListener> changeListeners;
 
 	private boolean isNotifying;
 
-	// private Set<ModelElementChangeListener> listenersToBeRemoved;
+	private Set<ModelChangeListener> listenersToBeRemoved;
 
 	/**
 	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
@@ -766,70 +769,62 @@ public abstract class UnicaseModelElementImpl extends EObjectImpl implements
 		return result.toString();
 	}
 
-	// public void addModelElementChangeListener(
-	// ModelElementChangeListener listener) {
-	// if (this.changeListeners.size() == 0) {
-	// internalChangeListener = new AdapterImpl() {
-	// /**
-	// * {@inheritDoc}
-	// */
-	// @Override
-	// public void notifyChanged(Notification notification) {
-	// notifyListenersAboutChange(notification);
-	// }
-	// };
-	// this.eAdapters().add(internalChangeListener);
-	// }
-	// this.changeListeners.add(listener);
-	// }
+	public void addModelElementChangeListener(ModelChangeListener listener) {
+		if (this.changeListeners.size() == 0) {
+			internalChangeListener = new AdapterImpl() {
+				/**
+				 * {@inheritDoc}
+				 */
+				@Override
+				public void notifyChanged(Notification notification) {
+					final ModelChangeNotification modelChangeNotification = new ModelChangeNotification(
+							notification);
+					notifyListenersAboutChange(modelChangeNotification);
+				}
+			};
+			this.eAdapters().add(internalChangeListener);
+		}
+		this.changeListeners.add(listener);
+	}
 
-	// public void removeModelElementChangeListener(
-	// ModelElementChangeListener listener) {
-	// // if we are notifying listeners at the moment than just add listener
-	// // for later removal
-	// if (isNotifying) {
-	// listenersToBeRemoved.add(listener);
-	// return;
-	// }
-	//
-	// this.changeListeners.remove(listener);
-	// if (this.changeListeners.size() < 1 && internalChangeListener != null) {
-	// this.eAdapters().remove(internalChangeListener);
-	// internalChangeListener = null;
-	// }
-	// }
-	//
-	// private void notifyListenersAboutChange(Notification notification) {
-	// isNotifying = true;
-	// for (ModelElementChangeListener listener : changeListeners) {
-	// try {
-	// listener.onChange(notification);
-	// }
-	// // BEGIN SUPRESS CATCH EXCEPTION
-	// catch (RuntimeException exception) {
-	// ModelUtil
-	// .logWarning(
-	// "ModelElementChangeListener threw RuntimeException on Change Notification "
-	// + ""
-	// + "(exception was caught and forwarded to listener for handling)",
-	// exception);
-	// try {
-	// listener.onRuntimeExceptionInListener(exception);
-	// } catch (RuntimeException runtimeException) {
-	// ModelUtil
-	// .logException(
-	// "Notifying listener about change in a model element failed, UI may not update properly now.",
-	// runtimeException);
-	// listenersToBeRemoved.add(listener);
-	// }
-	// }
-	// // END SUPRESS CATCH EXCEPTION
-	// }
-	// isNotifying = false;
-	// for (ModelElementChangeListener listener : listenersToBeRemoved) {
-	// removeModelElementChangeListener(listener);
-	// }
-	// listenersToBeRemoved.clear();
-	// }
+	public void removeModelElementChangeListener(ModelChangeListener listener) {
+		// if we are notifying listeners at the moment than just add listener
+		// for later removal
+		if (isNotifying) {
+			listenersToBeRemoved.add(listener);
+			return;
+		}
+
+		this.changeListeners.remove(listener);
+		if (this.changeListeners.size() < 1 && internalChangeListener != null) {
+			this.eAdapters().remove(internalChangeListener);
+			internalChangeListener = null;
+		}
+	}
+
+	private void notifyListenersAboutChange(ModelChangeNotification notification) {
+		isNotifying = true;
+		for (ModelChangeListener listener : changeListeners) {
+			try {
+				listener.notifyChange(notification);
+			}
+			// BEGIN SUPRESS CATCH EXCEPTION
+			catch (RuntimeException exception) {
+				ModelUtil
+						.logWarning(
+								"ModelElementChangeListener threw RuntimeException on Change Notification "
+										+ ""
+										+ "(exception was caught and forwarded to listener for handling)",
+								exception);
+
+			}
+			// END SUPRESS CATCH EXCEPTION
+		}
+		isNotifying = false;
+		for (ModelChangeListener listener : listenersToBeRemoved) {
+			removeModelElementChangeListener(listener);
+		}
+		listenersToBeRemoved.clear();
+	}
 
 } // ModelElementImpl
