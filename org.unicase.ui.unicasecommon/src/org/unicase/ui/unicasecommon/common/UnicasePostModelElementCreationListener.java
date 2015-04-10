@@ -9,10 +9,11 @@ package org.unicase.ui.unicasecommon.common;
 import java.util.Date;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.emfstore.client.ESUsersession;
 import org.eclipse.emf.emfstore.client.observer.ESPostCreationObserver;
-import org.eclipse.emf.emfstore.internal.server.exceptions.AccessControlException;
+import org.eclipse.emf.emfstore.internal.client.model.exceptions.UnkownProjectException;
+import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.unicase.model.UnicaseModelElement;
-import org.unicase.model.organization.User;
 import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
 
 /**
@@ -39,15 +40,15 @@ public class UnicasePostModelElementCreationListener implements
 			}
 
 			unicaseModelElement.setCreationDate(new Date());
-			User user;
+			ESUsersession userSession = null;
 
 			try {
-				user = OrgUnitHelper.getCurrentUser(modelElement);
-				if (user != null) {
-					unicaseModelElement.setCreator(user.getName());
-				}
-			} catch (AccessControlException e) {
-				// do nothing
+				userSession = OrgUnitHelper.getUserSession(modelElement);
+			} catch (UnkownProjectException e) {
+				ModelUtil.logWarning(e.getMessage(), e);
+			}
+			if (userSession != null) {
+				unicaseModelElement.setCreator(userSession.getUsername());
 			}
 		}
 	}

@@ -12,7 +12,6 @@ import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.unicase.ui.unicasecommon.ECPModelelementContext;
 
 /**
  * Abstract class for the ME controls.
@@ -43,8 +42,6 @@ public abstract class AbstractMEControl {
 	private boolean showLabel;
 
 	private IItemPropertyDescriptor itemPropertyDescriptor;
-
-	private ECPModelelementContext context;
 
 	/**
 	 * @return the toolkit
@@ -144,10 +141,7 @@ public abstract class AbstractMEControl {
 	 */
 	public Control createControl(Composite parent, int style,
 			IItemPropertyDescriptor itemPropertyDescriptor,
-			EObject modelElement, ECPModelelementContext context,
-			FormToolkit toolkit) {
-		this.setContext(context);
-		this.editingDomain = context.getEditingDomain();
+			EObject modelElement, FormToolkit toolkit) {
 		this.modelElement = modelElement;
 		this.toolkit = toolkit;
 		this.setItemPropertyDescriptor(itemPropertyDescriptor);
@@ -202,24 +196,4 @@ public abstract class AbstractMEControl {
 	public IItemPropertyDescriptor getItemPropertyDescriptor() {
 		return itemPropertyDescriptor;
 	}
-
-	/**
-	 * Setter for the {@link ECPModelelementContext}.
-	 * 
-	 * @param context
-	 *            the {@link ECPModelelementContext}
-	 */
-	public void setContext(ECPModelelementContext context) {
-		this.context = context;
-	}
-
-	/**
-	 * Getter for the {@link ECPModelelementContext}.
-	 * 
-	 * @return the {@link ECPModelelementContext}
-	 */
-	public ECPModelelementContext getContext() {
-		return context;
-	}
-
 }

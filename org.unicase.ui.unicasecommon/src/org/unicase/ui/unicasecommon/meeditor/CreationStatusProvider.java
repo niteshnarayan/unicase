@@ -10,10 +10,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecp.editor.e3.StatusMessageProvider;
 import org.unicase.model.UnicaseModelElement;
 
 /**
- * Creates a status message for meeditor including the creator and the creation date.
+ * Creates a status message for meeditor including the creator and the creation
+ * date.
  * 
  * @author helming
  */
@@ -33,9 +35,11 @@ public class CreationStatusProvider implements StatusMessageProvider {
 	/**
 	 * Builds status from creator and creation date.
 	 * 
-	 * @see org.unicase.ui.meeditor.StatusMessageProvider#getMessage(org.eclipse.emf.ecore.EObject) @ the status string
+	 * @see org.unicase.ui.meeditor.StatusMessageProvider#getMessage(org.eclipse.emf.ecore.EObject)
+	 *      @ the status string
 	 * @return the status string
-	 * @param modelElement the model element
+	 * @param modelElement
+	 *            the model element
 	 */
 	public String getMessage(EObject modelElement) {
 		if (!(modelElement instanceof UnicaseModelElement)) {

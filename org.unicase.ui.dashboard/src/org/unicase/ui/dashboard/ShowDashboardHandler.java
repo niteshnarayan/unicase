@@ -9,22 +9,22 @@ package org.unicase.ui.dashboard;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.emf.ecp.emfstore.core.internal.EMFStoreProvider;
-import org.eclipse.emf.ecp.spi.core.InternalProject;
-import org.eclipse.emf.emfstore.client.ESLocalProject;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.emfstore.client.ESUsersession;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
+import org.eclipse.emf.emfstore.internal.client.model.exceptions.UnkownProjectException;
 import org.eclipse.emf.emfstore.internal.client.model.util.EMFStoreCommand;
 import org.eclipse.emf.emfstore.internal.client.model.util.WorkspaceUtil;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.unicase.ui.dashboard.view.DashboardEditor;
 import org.unicase.ui.dashboard.view.DashboardEditorInput;
+import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
 
 /**
  * Handler for viewing the dashboard.
@@ -44,27 +44,16 @@ public class ShowDashboardHandler extends AbstractHandler {
 		ProjectSpace projectSpace = null;
 		final ISelection selection = HandlerUtil.getActiveMenuSelection(event);
 		final IStructuredSelection ssel = (IStructuredSelection) selection;
-		((ECPProject) ssel).
-		final ESLocalProject localProject = EMFStoreProvider.INSTANCE
-				.getProjectSpace((ECPProject) project);
-		if (localProject.getUsersession() == null) {
+		ESUsersession userSession = null;
+		try {
+			userSession = OrgUnitHelper.getUserSession((EObject) ssel
+					.getFirstElement());
+		} catch (UnkownProjectException e) {
+			ModelUtil.logWarning(e.getMessage());
+		}
+		if (userSession == null) {
 			return null;
 		}
-
-		if (projectSpace == null) {
-			// forbid null inputs
-			return null;
-		}
-
-		if (projectSpace.getUsersession() == null) {
-			// do not open when the project is not shared yet
-			MessageDialog
-					.openWarning(Display.getCurrent().getActiveShell(),
-							"No dashboard available",
-							"You can't open the dashboard because your project is not shared yet");
-			return null;
-		}
-
 		final ProjectSpace ps = projectSpace;
 		new EMFStoreCommand() {
 

@@ -12,18 +12,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
+import org.eclipse.emf.emfstore.internal.client.model.exceptions.UnkownProjectException;
 import org.eclipse.emf.emfstore.internal.client.ui.dialogs.CommitDialog;
 import org.eclipse.emf.emfstore.internal.client.ui.dialogs.CommitDialogTray;
 import org.eclipse.emf.emfstore.internal.client.ui.views.changes.ChangePackageVisualizationHelper;
 import org.eclipse.emf.emfstore.internal.common.model.ModelElementId;
+import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.eclipse.emf.emfstore.internal.server.conflictDetection.ModelElementIdToEObjectMappingImpl;
 import org.eclipse.emf.emfstore.internal.server.model.ProjectId;
+import org.eclipse.emf.emfstore.internal.server.model.versioning.ChangePackage;
 import org.eclipse.emf.emfstore.internal.server.model.versioning.VersioningFactory;
+import org.eclipse.emf.emfstore.internal.server.model.versioning.operations.AbstractOperation;
 import org.eclipse.emf.emfstore.internal.server.model.versioning.operations.OperationsPackage;
 import org.eclipse.emf.emfstore.internal.server.model.versioning.operations.ReferenceOperation;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -58,7 +61,6 @@ import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.unicase.dashboard.DashboardFactory;
 import org.unicase.dashboard.DashboardNotification;
 import org.unicase.dashboard.NotificationOperation;
-import org.unicase.model.organization.OrganizationPackage;
 import org.unicase.model.organization.User;
 import org.unicase.ui.unicasecommon.Activator;
 import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
@@ -218,8 +220,13 @@ public class CommitNotificationsTray extends CommitDialogTray {
 					.createNotificationOperation();
 			operation.getNotifications().addAll(notifications);
 			operation.setClientDate(new Date());
-			operation.setModelElementId(OrgUnitHelper.getUser(projectSpace)
-					.getModelElementId());
+			try {
+				operation.setModelElementId((ModelElementId) OrgUnitHelper
+						.getUserSession(projectSpace.getProject())
+						.getSessionId());
+			} catch (UnkownProjectException e) {
+				ModelUtil.logWarning(e.getMessage());
+			}
 			commitDialog.getChangePackage().getOperations().add(operation);
 
 		}
@@ -290,11 +297,8 @@ public class CommitNotificationsTray extends CommitDialogTray {
 					ElementListSelectionDialog dialog = new ElementListSelectionDialog(
 							getShell(), userLabelProvider);
 					dialog.setMultipleSelection(true);
-					dialog.setElements(projectSpace
-							.getProject()
-							.getAllModelElementsbyClass(
-									OrganizationPackage.eINSTANCE.getUser(),
-									new BasicEList<User>())
+					dialog.setElements(projectSpace.getProject()
+							.getAllModelElementsByClass(User.class, true)
 							.toArray(new User[0]));
 					if (dialog.open() == IDialogConstants.OK_ID) {
 						users.clear();
@@ -313,7 +317,9 @@ public class CommitNotificationsTray extends CommitDialogTray {
 				changePackage.getOperations().add(EcoreUtil.copy(ao));
 			}
 			final ChangePackageVisualizationHelper operationsHelper = new ChangePackageVisualizationHelper(
-					Arrays.asList(changePackage), projectSpace.getProject());
+					new ModelElementIdToEObjectMappingImpl(
+							projectSpace.getProject(),
+							Arrays.asList(changePackage)));
 
 			final LabelProvider operationsLabelProvider = new LabelProvider() {
 				@Override
@@ -371,66 +377,65 @@ public class CommitNotificationsTray extends CommitDialogTray {
 
 		@Override
 		protected void okPressed() {
-			User currentUser;
+			User currentUser = null;
 			try {
-				currentUser = OrgUnitHelper.getUser(projectSpace);
+				currentUser = OrgUnitHelper.getUser(projectSpace.getProject(),
+						OrgUnitHelper.getUserSession(projectSpace.getProject())
+								.getUsername());
+			} catch (UnkownProjectException e) {
+				ModelUtil.logWarning(e.getMessage());
+			}
+			if (currentUser == null) {
+				return;
+			}
+			for (User user : users) {
+				DashboardNotification notification = DashboardFactory.eINSTANCE
+						.createDashboardNotification();
+				notification.setName("Pushed name");
+				ProjectId projectIdCopy = EcoreUtil.copy(projectSpace
+						.getProjectId());
+				notification.setProject(projectIdCopy);
+				notification.setSender(currentUser.getName());
+				notification.setRecipient(user.getName());
+				List<AbstractOperation> operations = commitDialog
+						.getChangePackage().getOperations();
+				notification
+						.setCreationDate(operations.isEmpty() ? new Date(0)
+								: operations.get(operations.size() - 1)
+										.getClientDate());
+				String text = commentText.getText();
+				notification.setDetails(text == null ? "" : text);
+				notification.setSeen(false);
+				StringBuilder msgBuilder = new StringBuilder();
+				msgBuilder.append(URLHelper.getHTMLLinkForModelElement(
+						currentUser, projectSpace, URLHelper.DEFAULT));
+				msgBuilder
+						.append(" sent you a notification about this change:\n");
+				ModelElementId modelElementIdCopy = EcoreUtil.copy(operation
+						.getModelElementId());
+				msgBuilder
+						.append(visualizationHelper.getDescription(operation));
+				msgBuilder.append(" in ");
+				msgBuilder.append(URLHelper.getHTMLLinkForModelElement(
+						modelElementIdCopy, projectSpace, URLHelper.UNLTD));
+				notification.setMessage(msgBuilder.toString());
 
-				for (User user : users) {
-					DashboardNotification notification = DashboardFactory.eINSTANCE
-							.createDashboardNotification();
-					notification.setName("Pushed name");
-					ProjectId projectIdCopy = EcoreUtil.copy(projectSpace
-							.getProjectId());
-					notification.setProject(projectIdCopy);
-					notification.setSender(currentUser.getName());
-					notification.setRecipient(user.getName());
-					List<AbstractOperation> operations = commitDialog
-							.getChangePackage().getOperations();
-					notification
-							.setCreationDate(operations.isEmpty() ? new Date(0)
-									: operations.get(operations.size() - 1)
-											.getClientDate());
-					String text = commentText.getText();
-					notification.setDetails(text == null ? "" : text);
-					notification.setSeen(false);
-					StringBuilder msgBuilder = new StringBuilder();
-					msgBuilder.append(URLHelper.getHTMLLinkForModelElement(
-							currentUser, projectSpace, URLHelper.DEFAULT));
-					msgBuilder
-							.append(" sent you a notification about this change:\n");
-					ModelElementId modelElementIdCopy = EcoreUtil
-							.copy(operation.getModelElementId());
-					msgBuilder.append(visualizationHelper
-							.getDescription(operation));
-					msgBuilder.append(" in ");
-					msgBuilder.append(URLHelper.getHTMLLinkForModelElement(
-							modelElementIdCopy, projectSpace, URLHelper.UNLTD));
-					notification.setMessage(msgBuilder.toString());
-
-					notification.getRelatedModelElements().add(
-							modelElementIdCopy);
-					if (OperationsPackage.eINSTANCE.getReferenceOperation()
-							.isInstance(operation)) {
-						ReferenceOperation referenceOp = (ReferenceOperation) operation;
-						Set<ModelElementId> otherInvolvedModelElements = referenceOp
-								.getOtherInvolvedModelElements();
-						for (ModelElementId id : otherInvolvedModelElements) {
-							ModelElementId idCopy = EcoreUtil.copy(id);
-							notification.getRelatedModelElements().add(idCopy);
-						}
+				notification.getRelatedModelElements().add(modelElementIdCopy);
+				if (OperationsPackage.eINSTANCE.getReferenceOperation()
+						.isInstance(operation)) {
+					ReferenceOperation referenceOp = (ReferenceOperation) operation;
+					Set<ModelElementId> otherInvolvedModelElements = referenceOp
+							.getOtherInvolvedModelElements();
+					for (ModelElementId id : otherInvolvedModelElements) {
+						ModelElementId idCopy = EcoreUtil.copy(id);
+						notification.getRelatedModelElements().add(idCopy);
 					}
-
-					notifications.add(notification);
-
 				}
 
-			} catch (NoCurrentUserException e) {
-				DialogHandler
-						.showErrorDialog("You don't seem to have a valid user");
-			} catch (CannotMatchUserInProjectException e) {
-				DialogHandler
-						.showErrorDialog("You don't seem to have a valid user");
+				notifications.add(notification);
+
 			}
+
 			notificationsTable.setInput(notifications.toArray());
 			close();
 		}

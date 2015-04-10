@@ -377,9 +377,12 @@
    </extension>
       <extension
          point="org.eclipse.emf.ecp.ui.modelElementOpener">
-      <modelElementOpener
-            class="org.unicase.ui.usecaseDiagram.UseCaseDiagramOpener"
-            name="org.unicase.ui.MEDiagramEditor">
+            <modelElementOpener
+               class="org.unicase.ui.usecaseDiagram.UseCaseDiagramOpener">
+                 <staticTester
+               modelElement="org.unicase.model.diagram.MEDiagram"
+               priority="5">
+         </staticTester>
       </modelElementOpener>
    </extension>
    <!-- optionally, specify keybindings -->

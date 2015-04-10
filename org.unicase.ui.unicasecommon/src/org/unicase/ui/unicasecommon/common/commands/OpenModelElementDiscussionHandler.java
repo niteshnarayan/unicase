@@ -10,10 +10,16 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecp.core.ECPProject;
+import org.eclipse.emf.ecp.editor.e3.AbstractMEEditorPage;
+import org.eclipse.emf.ecp.editor.e3.MEEditorInput;
+import org.eclipse.emf.ecp.editor.internal.e3.MEEditor;
+import org.eclipse.emf.ecp.explorereditorbridge.internal.EditorContext;
 import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.unicase.model.UnicaseModelElement;
 import org.unicase.ui.unicasecommon.meeditor.METhreadPage;
@@ -58,8 +64,9 @@ public class OpenModelElementDiscussionHandler extends AbstractHandler {
 		}
 
 		try {
-			MEEditorInput input = new MEEditorInput(me, ESWorkspaceProviderImpl
-					.getInstance().getWorkspace().getLocalProject(me));
+			MEEditorInput input = new MEEditorInput(new EditorContext(me,
+					(ECPProject) ESWorkspaceProviderImpl.getInstance()
+							.getWorkspace().getLocalProject(me)));
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 					.getActivePage()
 					.openEditor(input, "org.eclipse.emf.ecp.editor", true);
@@ -73,22 +80,19 @@ public class OpenModelElementDiscussionHandler extends AbstractHandler {
 				boolean shouldToggle = (toggle != null && toggle
 						.equals("toggle"))
 						|| ((UnicaseModelElement) me).getComments().isEmpty();
-				if (meEditor.getActivePageInstance() instanceof MEFormPage) {
-					MEFormPage page = (MEFormPage) meEditor
+				if (meEditor.getActivePageInstance() instanceof AbstractMEEditorPage) {
+					AbstractMEEditorPage page = (AbstractMEEditorPage) meEditor
 							.getActivePageInstance();
-					if (page.getId()
+					if (((IFormPage) page)
+							.getId()
 							.equals("org.unicase.ui.unicasecommon.meeditor.methreadpage")
-							&& page.getParentMEPage() instanceof METhreadPage
 							&& shouldToggle) {
-						((METhreadPage) page.getParentMEPage()).addComment();
+						((METhreadPage) page).addComment();
 					}
 				}
 			}
 		} catch (PartInitException e) {
-			// TODO: handle exception
 			e.printStackTrace();
-		} catch (NoWorkspaceException e) {
-			DialogHandler.showExceptionDialog(e);
 		}
 
 		return null;

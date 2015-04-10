@@ -6,8 +6,10 @@
  */
 package org.unicase.ui.activityDiagram;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecp.core.ECPProject;
 import org.eclipse.emf.ecp.ui.util.ECPModelElementOpener;
+import org.unicase.model.diagram.ActivityDiagram;
 import org.unicase.model.diagram.MEDiagram;
 import org.unicase.ui.unicasecommon.common.diagram.DiagramOpener;
 
@@ -18,10 +20,27 @@ import org.unicase.ui.unicasecommon.common.diagram.DiagramOpener;
  */
 public class ActivityDiagramOpener extends DiagramOpener implements
 		ECPModelElementOpener {
+	/**
+	 * Convenient constructor.
+	 */
+	public ActivityDiagramOpener() {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @see org.unicase.ui.util.ModelElementOpener#canOpen(org.unicase.metamodel.ModelElement)
+	 */
+	public int canOpen(EObject me) {
+		if (me instanceof ActivityDiagram) {
+			return 5;
+		}
+		return 0;
+	}
 
 	@Override
 	public void openModelElement(Object element, ECPProject ecpProject) {
-		if (element instanceof MEDiagram) {
+		if (element instanceof ActivityDiagram) {
 			MEDiagram diagram = (MEDiagram) element;
 			super.openDiagram(diagram,
 					"org.unicase.ui.diagram.activityDiagram.part.ModelDiagramEditorID");
@@ -29,7 +48,6 @@ public class ActivityDiagramOpener extends DiagramOpener implements
 			throw new IllegalArgumentException(
 					"Opener only applicable for MEDiagrams");
 		}
-
 	}
 
 }

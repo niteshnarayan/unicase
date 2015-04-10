@@ -10,7 +10,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
+import org.eclipse.emf.ecp.core.ECPProject;
+import org.eclipse.emf.ecp.core.util.ECPUtil;
 import org.eclipse.emf.emfstore.internal.client.model.util.EMFStoreCommand;
 import org.eclipse.emf.emfstore.internal.client.properties.PropertyManager;
 import org.eclipse.emf.emfstore.internal.common.model.EMFStoreProperty;
@@ -38,41 +39,51 @@ public class SubscriptionHandler extends AbstractHandler {
 		EObject eObject = UnicaseActionHelper.getEObject(event);
 
 		if (eObject == null) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Invalid model element",
-				"Could not determine the active model element!");
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
+					"Invalid model element",
+					"Could not determine the active model element!");
 			return null;
 		}
 
-		final ProjectSpace projectSpace = WorkspaceManager.getProjectSpace(eObject);
+		final ECPProject projectSpace = ECPUtil.getECPProjectManager()
+				.getProject(eObject);
 		if (projectSpace == null) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Invalid active project",
-				"Could not determine the active project!");
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
+					"Invalid active project",
+					"Could not determine the active project!");
 			return null;
 		}
 
 		try {
 			OrgUnitHelper.getUser(projectSpace);
 		} catch (NoCurrentUserException e) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Invalid user",
-				"Could not determine the active user!");
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
+					"Invalid user", "Could not determine the active user!");
 			return null;
 		} catch (CannotMatchUserInProjectException e) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Invalid user",
-				"Could not match your user in the project!");
+			MessageDialog
+					.openError(Display.getCurrent().getActiveShell(),
+							"Invalid user",
+							"Could not match your user in the project!");
 			return null;
 		}
 
-		final PropertyManager propertyManager = projectSpace.getPropertyManager();
-		EMFStoreProperty property = propertyManager.getLocalProperty(DashboardPropertyKeys.SUBSCRIPTIONS);
+		final PropertyManager propertyManager = projectSpace
+				.getPropertyManager();
+		EMFStoreProperty property = propertyManager
+				.getLocalProperty(DashboardPropertyKeys.SUBSCRIPTIONS);
 
 		boolean contains;
 		final SubscriptionComposite subscriptionComposite;
-		final ModelElementId modelElementId = projectSpace.getProject().getModelElementId(eObject);
+		final ModelElementId modelElementId = projectSpace.getProject()
+				.getModelElementId(eObject);
 		if (property != null) {
 			subscriptionComposite = (SubscriptionComposite) property.getValue();
-			contains = subscriptionComposite.getSubscriptions().contains(modelElementId);
+			contains = subscriptionComposite.getSubscriptions().contains(
+					modelElementId);
 		} else {
-			subscriptionComposite = DashboardFactory.eINSTANCE.createSubscriptionComposite();
+			subscriptionComposite = DashboardFactory.eINSTANCE
+					.createSubscriptionComposite();
 			contains = false;
 		}
 		String feedback;
@@ -82,8 +93,11 @@ public class SubscriptionHandler extends AbstractHandler {
 
 				@Override
 				protected void doRun() {
-					subscriptionComposite.getSubscriptions().remove(modelElementId);
-					propertyManager.setLocalProperty(DashboardPropertyKeys.SUBSCRIPTIONS, subscriptionComposite);
+					subscriptionComposite.getSubscriptions().remove(
+							modelElementId);
+					propertyManager.setLocalProperty(
+							DashboardPropertyKeys.SUBSCRIPTIONS,
+							subscriptionComposite);
 				}
 
 			};
@@ -94,8 +108,11 @@ public class SubscriptionHandler extends AbstractHandler {
 
 				@Override
 				protected void doRun() {
-					subscriptionComposite.getSubscriptions().add(modelElementId);
-					propertyManager.setLocalProperty(DashboardPropertyKeys.SUBSCRIPTIONS, subscriptionComposite);
+					subscriptionComposite.getSubscriptions()
+							.add(modelElementId);
+					propertyManager.setLocalProperty(
+							DashboardPropertyKeys.SUBSCRIPTIONS,
+							subscriptionComposite);
 				}
 
 			};
@@ -106,8 +123,12 @@ public class SubscriptionHandler extends AbstractHandler {
 		command.run(true);
 
 		// TODO fix label provider
-		MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Subscription",
-			AdapterUtils.getItemProviderText(eObject) + " was successfully" + feedback + "your subscriptions");
+		MessageDialog
+				.openInformation(Display.getCurrent().getActiveShell(),
+						"Subscription",
+						AdapterUtils.getItemProviderText(eObject)
+								+ " was successfully" + feedback
+								+ "your subscriptions");
 		return null;
 	}
 }

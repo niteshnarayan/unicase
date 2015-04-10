@@ -540,8 +540,11 @@
       <extension
          point="org.eclipse.emf.ecp.ui.modelElementOpener">
       <modelElementOpener
-               class="org.unicase.ui.classDiagram.ClassDiagramOpener"
-            name="org.unicase.ui.MEDiagramEditor">
+               class="org.unicase.ui.classDiagram.ClassDiagramOpener">
+                 <staticTester
+               modelElement="org.unicase.model.diagram.ClassDiagram"
+               priority="5">
+         </staticTester>
       </modelElementOpener>
    </extension>
 
