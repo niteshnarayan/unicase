@@ -17,13 +17,13 @@ import org.eclipse.gmf.runtime.common.core.command.CommandResult;
 import org.eclipse.gmf.runtime.emf.type.core.commands.DestroyElementCommand;
 import org.eclipse.gmf.runtime.emf.type.core.requests.DestroyElementRequest;
 import org.unicase.model.diagram.MEDiagram;
-import org.unicase.ui.unicasecommon.ECPModelelementContext;
 import org.unicase.ui.unicasecommon.common.util.DNDHelper;
 import org.unicase.ui.unicasecommon.diagram.util.EditPartUtility;
 
 // dengler: refactor use of edit part request and variables
 /**
- * Command to remove a model element from the diagram elements list, not from the model.
+ * Command to remove a model element from the diagram elements list, not from
+ * the model.
  * 
  * @author denglerm
  */
@@ -37,10 +37,13 @@ public class DeleteFromDiagramCommand extends DestroyElementCommand {
 	/**
 	 * Constructs a new command to delete an element from the diagram.
 	 * 
-	 * @param request the destroy element request
-	 * @param editPart the editPart of the element to delete from the diagram
+	 * @param request
+	 *            the destroy element request
+	 * @param editPart
+	 *            the editPart of the element to delete from the diagram
 	 */
-	public DeleteFromDiagramCommand(DestroyElementRequest request, EditPart editPart) {
+	public DeleteFromDiagramCommand(DestroyElementRequest request,
+			EditPart editPart) {
 		super(request);
 		this.editPart = editPart;
 	}
@@ -49,18 +52,23 @@ public class DeleteFromDiagramCommand extends DestroyElementCommand {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected CommandResult doExecuteWithResult(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
+	protected CommandResult doExecuteWithResult(IProgressMonitor monitor,
+			IAdaptable info) throws ExecutionException {
 
 		EObject destructee = null;
 		destructee = this.getElementToDestroy();
 		ECPModelelementContext context = DNDHelper.getECPModelelementContext();
 		if (context == null) {
-			return CommandResult.newErrorCommandResult("Could not compute association classes to delete.");
+			return CommandResult
+					.newErrorCommandResult("Could not compute association classes to delete.");
 		}
-		List<EObject> additionalMEs = AssociationClassHelper.getRelatedAssociationClassToDelete(destructee, context
-			.getMetaModelElementContext());
-		EditPart diagramEditPart = EditPartUtility.getDiagramEditPart(this.editPart);
-		MEDiagram diag = (MEDiagram) EditPartUtility.getElement(diagramEditPart);
+		List<EObject> additionalMEs = AssociationClassHelper
+				.getRelatedAssociationClassToDelete(destructee,
+						context.getMetaModelElementContext());
+		EditPart diagramEditPart = EditPartUtility
+				.getDiagramEditPart(this.editPart);
+		MEDiagram diag = (MEDiagram) EditPartUtility
+				.getElement(diagramEditPart);
 		diag.getElements().remove(destructee);
 		for (EObject additionalME : additionalMEs) {
 			diag.getElements().remove(additionalME);
@@ -73,18 +81,23 @@ public class DeleteFromDiagramCommand extends DestroyElementCommand {
 	}
 
 	/**
-	 * Remove references (e.g. associations in class diagram) from the element to other diagram elements.
+	 * Remove references (e.g. associations in class diagram) from the element
+	 * to other diagram elements.
 	 * 
 	 * @deprecated Depreciated since we added AssociationClassElement.
-	 * @param destructee the object being destroyed
-	 * @param diag the MEDiagram
+	 * @param destructee
+	 *            the object being destroyed
+	 * @param diag
+	 *            the MEDiagram
 	 */
 	@Deprecated
 	protected void tearDownReferences(EObject destructee, MEDiagram diag) {
 		/*
-		 * Set<ModelElement> diagramNodeReferences = destructee.getCrossReferencedModelElements(); for (ModelElement
-		 * object : diagramNodeReferences) { if (object instanceof Association || object instanceof
-		 * org.unicase.model.state.Transition || object instanceof org.unicase.model.activity.Transition) {
+		 * Set<ModelElement> diagramNodeReferences =
+		 * destructee.getCrossReferencedModelElements(); for (ModelElement
+		 * object : diagramNodeReferences) { if (object instanceof Association
+		 * || object instanceof org.unicase.model.state.Transition || object
+		 * instanceof org.unicase.model.activity.Transition) {
 		 * diag.getElements().remove(object); } }
 		 */
 	}

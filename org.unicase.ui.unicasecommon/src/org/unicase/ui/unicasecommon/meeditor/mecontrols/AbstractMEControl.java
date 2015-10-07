@@ -9,6 +9,7 @@ package org.unicase.ui.unicasecommon.meeditor.mecontrols;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
+import org.eclipse.emf.emfstore.client.ESLocalProject;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -42,6 +43,8 @@ public abstract class AbstractMEControl {
 	private boolean showLabel;
 
 	private IItemPropertyDescriptor itemPropertyDescriptor;
+
+	private ESLocalProject context;
 
 	/**
 	 * @return the toolkit
@@ -196,4 +199,24 @@ public abstract class AbstractMEControl {
 	public IItemPropertyDescriptor getItemPropertyDescriptor() {
 		return itemPropertyDescriptor;
 	}
+
+	/**
+	 * Setter for the {@link ECPModelelementContext}.
+	 * 
+	 * @param context
+	 *            the {@link ECPModelelementContext}
+	 */
+	public void setContext(ESLocalProject context) {
+		this.context = context;
+	}
+
+	/**
+	 * Getter for the {@link ECPModelelementContext}.
+	 * 
+	 * @return the {@link ECPModelelementContext}
+	 */
+	public ESLocalProject getContext() {
+		return context;
+	}
+
 }

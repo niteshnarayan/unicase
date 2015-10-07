@@ -14,10 +14,11 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecp.core.ECPProject;
 import org.eclipse.emf.emfstore.client.ESWorkspace;
+import org.eclipse.emf.emfstore.client.ESWorkspaceProvider;
 import org.eclipse.emf.emfstore.internal.common.model.IdEObjectCollection;
 import org.eclipse.emf.emfstore.internal.common.model.Project;
-import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IToolBarManager;
@@ -118,12 +119,8 @@ public class UnicaseTableView extends ViewPart
 		viewer.createColumns(EcoreFactory.eINSTANCE.getEcorePackage()
 				.getEObject(), null, false);
 
-		try {
-			workspace = ECPWorkspaceManager.getInstance().getWorkSpace();
-		} catch (NoWorkspaceException e) {
-			ModelUtil.logException("Failed to receive Project!", e);
-			return;
-		}
+		workspace = ESWorkspaceProvider.INSTANCE.getWorkspace();
+
 		workspaceListenerAdapter = new AdapterImpl() {
 
 			@Override

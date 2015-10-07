@@ -17,7 +17,10 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecp.core.util.ECPUtil;
+import org.eclipse.emf.ecp.spi.core.InternalProject;
+import org.eclipse.emf.ecp.spi.ui.util.ECPHandlerHelper;
 import org.eclipse.emf.edit.provider.DelegatingWrapperItemProvider;
+import org.eclipse.emf.emfstore.client.ESLocalProject;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -36,7 +39,6 @@ import org.unicase.model.diagram.ComponentDiagram;
 import org.unicase.model.diagram.MEDiagram;
 import org.unicase.model.diagram.StateDiagram;
 import org.unicase.model.diagram.UseCaseDiagram;
-import org.unicase.ui.unicasecommon.ECPModelelementContext;
 
 /**
  * @author Hodaie This class contains some utility method for commands and
@@ -224,7 +226,9 @@ public final class UnicaseActionHelper {
 	 *            (see description above)
 	 */
 	public static void openModelElement(EObject me, String identifier) {
-		UnicaseActionHelper.openModelElement(me, identifier);
+		final InternalProject project = (InternalProject) ECPUtil
+				.getECPProjectManager().getProject(me);
+		ECPHandlerHelper.openModelElement(me, project);
 	}
 
 	/**
@@ -234,9 +238,9 @@ public final class UnicaseActionHelper {
 	 *            the model lement
 	 * @return the context
 	 */
-	public static ECPModelelementContext getContext(EObject modelElement) {
-		return (ECPModelelementContext) ECPUtil.getECPProjectManager()
-				.getProject(modelElement);
+	public static ESLocalProject getContext(EObject modelElement) {
+		return (ESLocalProject) ECPUtil.getECPProjectManager().getProject(
+				modelElement);
 	}
 
 	/**

@@ -46,14 +46,14 @@ Export-Package: org.unicase.ui.unicasecommon,
  org.unicase.ui.unicasecommon.diagram.requests,
  org.unicase.ui.unicasecommon.diagram.shapes,
  org.unicase.ui.unicasecommon.diagram.util,
- org.unicase.ui.unicasecommon.dnd.dropadapters,
  org.unicase.ui.unicasecommon.file.util,
- org.unicase.ui.unicasecommon.meeditor,
  org.unicase.ui.unicasecommon.meeditor.mecontrols,
+ org.unicase.ui.unicasecommon.meeditor.mecontrols.issuecontrol,
  org.unicase.ui.unicasecommon.navigator.wizards,
  org.unicase.ui.unicasecommon.observer
 Import-Package: org.eclipse.emf.common.ui,
  org.eclipse.ui.part,
  org.unicase.model.diagram,
- org.unicase.model.diagram.impl
+ org.unicase.model.diagram.impl,
+ org.unicase.ui.unicasecommon.meeditor.mecontrols
 Bundle-Vendor: unicase.org

@@ -15,6 +15,7 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecp.core.util.ECPUtil;
 import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.Workspace;
@@ -130,7 +131,8 @@ public class TaskView extends ViewPart
 			activeProject = ModelUtil.getProject((EObject) parent);
 			activeProject.addIdEObjectCollectionChangeObserver(this);
 			VISITED_PROJECTS.add(activeProject);
-
+			ECPUtil.getECPProjectManager().getProject(
+					modelElement)
 			ECPWorkspaceManager.getECPProject(activeProject)
 					.addModelElementContextListener(contextListener);
 		}

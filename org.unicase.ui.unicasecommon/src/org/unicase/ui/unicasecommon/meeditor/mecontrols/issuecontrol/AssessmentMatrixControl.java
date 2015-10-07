@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import javax.naming.ldap.ControlFactory;
-
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecp.view.spi.model.ModelChangeListener;
+import org.eclipse.emf.ecp.view.spi.model.ModelChangeNotification;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
@@ -36,9 +36,9 @@ import org.unicase.model.rationale.Proposal;
 import org.unicase.model.rationale.RationaleFactory;
 import org.unicase.model.rationale.RationalePackage;
 import org.unicase.model.rationale.impl.RationaleFactoryImpl;
-import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
 import org.unicase.ui.unicasecommon.meeditor.mecontrols.AbstractMEControl;
 import org.unicase.ui.unicasecommon.meeditor.mecontrols.AbstractUnicaseMEControl;
+import org.unicase.ui.unicasecommon.meeditor.mecontrols.uccontrol.ControlFactory;
 
 /**
  * Class displays assessment matrix for issues.
@@ -245,8 +245,7 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 
 				Composite comp = getToolkit().createComposite(matrixSection);
 				assessmentControlDescription.createControl(comp, parentStyle,
-						pDescriptorAssessmentValue, assessment,
-						UnicaseActionHelper.getContext(issue), getToolkit());
+						pDescriptorAssessmentValue, assessment, getToolkit());
 				comp.setLayout(new GridLayout(1, true));
 				GridData gridData = new GridData();
 				gridData.horizontalAlignment = GridData.HORIZONTAL_ALIGN_CENTER;
@@ -410,7 +409,7 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	 * 
 	 * @author borner
 	 */
-	public class IssueListener implements ModelElementChangeListener {
+	public class IssueListener implements ModelChangeListener {
 
 		/**
 		 * {@inheritDoc}
@@ -486,6 +485,11 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 				}
 			}
 		}
+
+		public void notifyChange(ModelChangeNotification notification) {
+			// TODO Auto-generated method stub
+
+		}
 	}
 
 	/**
@@ -493,7 +497,7 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	 * 
 	 * @author borner
 	 */
-	public class CriterionListener implements ModelElementChangeListener {
+	public class CriterionListener implements ModelChangeListener {
 
 		/**
 		 * {@inheritDoc}
@@ -522,6 +526,11 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 			// do nothing
 		}
 
+		public void notifyChange(ModelChangeNotification notification) {
+			// TODO Auto-generated method stub
+
+		}
+
 	}
 
 	/**
@@ -529,7 +538,7 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	 * 
 	 * @author koegel
 	 */
-	public class ProposalListener implements ModelElementChangeListener {
+	public class ProposalListener implements ModelChangeListener {
 
 		/**
 		 * {@inheritDoc}
@@ -557,6 +566,11 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		public void onRuntimeExceptionInListener(RuntimeException exception) {
 			// do nothing
 		}
+
+		public void notifyChange(ModelChangeNotification notification) {
+			// TODO Auto-generated method stub
+
+		}
 	}
 
 	/**
@@ -564,7 +578,7 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 	 * 
 	 * @author borner
 	 */
-	public class AssessmentListener implements ModelElementChangeListener {
+	public class AssessmentListener implements ModelChangeListener {
 
 		/**
 		 * {@inheritDoc}
@@ -592,6 +606,11 @@ public class AssessmentMatrixControl extends AbstractUnicaseMEControl {
 		 */
 		public void onRuntimeExceptionInListener(RuntimeException exception) {
 			// do nothing
+		}
+
+		public void notifyChange(ModelChangeNotification notification) {
+			// TODO Auto-generated method stub
+
 		}
 
 	}

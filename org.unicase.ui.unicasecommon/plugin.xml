@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.2"?>
+<?eclipse version="4"?>
 <plugin>
    <extension-point id="org.eclipse.emf.emfstore.client.postCreationObserver" name="PostCreationObserver" schema="schema/org.eclipse.emf.emfstore.client.postCreationObserver.exsd"/>
    
@@ -86,11 +86,6 @@
             name="followupMeeting">
       </command>
       <command
-            defaultHandler="org.unicase.ui.unicasecommon.navigator.commands.ShowMEInNavigatorHandler"
-            id="org.unicase.ui.navigator.ShowMEInNavigator"
-            name="ShowMEInNavigator">
-      </command>
-      <command
             categoryId="org.unicase.ui.common.modifyModelelement"
             defaultHandler="org.unicase.ui.unicasecommon.common.handlers.NewDocumentHandler"
             id="org.unicase.ui.common.newDocument"
@@ -131,11 +126,6 @@
             name="annotateActionItem">
       </command>
     
-      <command
-            defaultHandler="org.unicase.ui.unicasecommon.common.handlers.SubscriptionHandler"
-            id="org.unicase.ui.common.commands.subscribeToModelElement"
-            name="subscribeToModelElement">
-      </command>
       <category
             id="org.unicase.ui.common.modifyModelelement"
             name="Modify Modelelement">
@@ -145,11 +135,6 @@
             id="org.eclipse.emf.ecp.editor.openModelElementDiscussion"
             name="Open Discussion">
       </command>
-      <command
-            defaultHandler="org.unicase.ui.unicasecommon.navigator.commands.CollapseAllHandler"
-            id="org.unicase.ui.navigator.CollapseAll"
-            name="Collapse All">
-      </command>
    </extension>
     <!--    -->
 
@@ -157,61 +142,7 @@
    
   <extension
         point="org.eclipse.ui.menus">
-     <menuContribution
-           locationURI="toolbar:org.unicase.ui.unicasecommon.meeditor.METhreadPage?after=additions">
-        <command
-              commandId="org.unicase.ui.common.commands.annotateActionItem"
-              icon="icons/ActionItem.png"
-              label="Add Action Item"
-              style="push">
-           <visibleWhen
-                 checkEnabled="false">
-              <with
-                    variable="activeModelelement">
-                 <reference
-                       definitionId="org.unicase.ui.common.commands.modelElementNotSection">
-                 </reference>
-              </with>
-           </visibleWhen>
-        </command>
-        <command
-              commandId="org.unicase.ui.common.commands.annotateIssue"
-              icon="icons/Issue.gif"
-              label="Add Issue"
-              style="push">
-           <visibleWhen
-                 checkEnabled="false">
-              <with
-                    variable="activeModelelement">
-                 <reference
-                       definitionId="org.unicase.ui.common.commands.modelElementNotSection">
-                 </reference>
-              </with>
-           </visibleWhen>
-        </command>
-        <command
-              commandId="org.unicase.ui.common.commands.addComment"
-              icon="icons/Comment.png"
-              label="Add Comment"
-              style="push">
-        </command>
-        <command
-              commandId="org.unicase.ui.common.commands.subscribeToModelElement"
-              icon="icons/subscribe.png"
-              label="Subscribe for this ModelElement">
-        </command>
-     </menuContribution>
      
-     <menuContribution
-           locationURI="toolbar:org.unicase.ui.unicasecommon.meeditor.METhreadPage?after=additions">
-        <command
-              commandId="org.unicase.ui.common.commands.addComment"
-              icon="icons/Comment.png"
-              label="Add Comment"
-              style="push">
-        </command>
-
-     </menuContribution>
      <menuContribution
            locationURI="popup:org.eclipse.emf.ecp.ui.ModelExplorerView">
         <command
@@ -326,21 +257,37 @@
               icon="icons/NewModelElement.png"
               label="New model element..."
               style="push">
-           <visibleWhen
-                 checkEnabled="false">
-              <and>
-                 <iterate
-                       ifEmpty="false"
-                       operator="and">
-                    <instanceof
-                          value="org.unicase.model.document.LeafSection">
-                    </instanceof>
-                 </iterate>
-                 <count
-                       value="1">
-                 </count>
-              </and>
-           </visibleWhen>
+              <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                     <and>
+                        <count
+                              value="1">
+                        </count>
+                        <iterate
+                              ifEmpty="false"
+                              operator="and">
+                           <test
+                                 args="org.eclipse.emf.ecp.ui.wizards.newModelElementWizard"
+                                 property="org.eclipse.emf.ecp.ui.e3.workbench.menu.enablement"
+                                 value="true">
+                           </test>
+                           <or>
+                              <instanceof
+                                    value="org.eclipse.emf.ecore.resource.Resource">
+                              </instanceof>
+                              <instanceof
+                                    value="org.eclipse.emf.ecp.core.ECPProject">
+                              </instanceof>
+                                   <instanceof
+                                    value="org.unicase.model.document.LeafSection">
+                              </instanceof>
+                           </or>
+                        </iterate>
+                     </and>
+               </with>
+            </visibleWhen>
         </command>
         <separator
               name="org.unicase.ui.navigator.createModelElementCommands"
@@ -790,62 +737,6 @@
     </page>
  </extension>
   <extension
-        point="org.eclipse.emf.ecp.editor.pages">
-    <page
-          class="org.unicase.ui.unicasecommon.meeditor.MEDescriptionPage"
-          name="org.unicase.ui.unicasecommon.meeditor.descriptionpage">
-    </page>
- </extension>
-  <extension
-        point="org.eclipse.emf.ecp.editor.pages">
-    <page
-          class="org.unicase.ui.unicasecommon.meeditor.METhreadPage"
-          name="org.unicase.ui.unicasecommon.meeditor.methreadpage">
-    </page>
- </extension>
-  <extension
-        point="org.eclipse.emf.ecp.ui.dropAdapter">
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.UCDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.CompositeSectionDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.AnnotationDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.LeafSectionDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.MEDiagramDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.MeetingDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.ProjectDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.WorkItemMeetingSectionDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.WorkPackageDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.MilestoneDropAdapter">
-    </ECPDropAdapter>
-    <ECPDropAdapter
-          class="org.unicase.ui.unicasecommon.dnd.dropadapters.IssueMeetingDiscussionSectionDropAdapter">
-    </ECPDropAdapter>
- </extension>
-  <extension
-        point="org.eclipse.emf.ecp.editor.statusmessage">
-     <provider
-           class="org.unicase.ui.unicasecommon.meeditor.CreationStatusProvider">
-     </provider>
-  </extension>
-  <extension
         point="org.eclipse.emf.emfstore.client.postCreationObserver">
      <observer
            postCreationObserver="org.unicase.ui.unicasecommon.common.UnicasePostModelElementCreationListener">
@@ -862,7 +753,7 @@
         name="Workspace Location Provider"
         point="org.eclipse.emf.emfstore.client.workspaceLocationProvider">
      <LocationProvider
-           providerClass="org.eclipse.emf.emfstore.client.model.util.DefaultWorkspaceLocationProvider">
+           providerClass="org.eclipse.emf.emfstore.internal.client.model.util.DefaultWorkspaceLocationProvider">
      </LocationProvider>
   </extension>
   <extension

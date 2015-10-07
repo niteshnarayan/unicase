@@ -25,16 +25,26 @@ import org.unicase.model.task.util.MEState;
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getName <em>Name</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getDescription <em>Description</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getAnnotations <em>Annotations</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getAttachments <em>Attachments</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getIncomingDocumentReferences <em>Incoming Document References</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getState <em>State</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getAppliedStereotypeInstances <em>Applied Stereotype Instances</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getComments <em>Comments</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getCreationDate <em>Creation Date</em>}</li>
- *   <li>{@link org.unicase.model.UnicaseModelElement#getCreator <em>Creator</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getName <em>Name</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getDescription <em>
+ * Description</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getAnnotations <em>
+ * Annotations</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getAttachments <em>
+ * Attachments</em>}</li>
+ * <li>
+ * {@link org.unicase.model.UnicaseModelElement#getIncomingDocumentReferences
+ * <em>Incoming Document References</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getState <em>State</em>}</li>
+ * <li>
+ * {@link org.unicase.model.UnicaseModelElement#getAppliedStereotypeInstances
+ * <em>Applied Stereotype Instances</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getComments <em>Comments
+ * </em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getCreationDate <em>Creation
+ * Date</em>}</li>
+ * <li>{@link org.unicase.model.UnicaseModelElement#getCreator <em>Creator</em>}
+ * </li>
  * </ul>
  * </p>
  *
@@ -85,10 +95,13 @@ public interface UnicaseModelElement extends EObject {
 	String getDescription();
 
 	/**
-	 * Sets the value of the '{@link org.unicase.model.UnicaseModelElement#getDescription <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc --> <!--
+	 * Sets the value of the '
+	 * {@link org.unicase.model.UnicaseModelElement#getDescription
+	 * <em>Description</em>}' attribute. <!-- begin-user-doc --> <!--
 	 * end-user-doc -->
-	 * @param value the new value of the '<em>Description</em>' attribute.
+	 * 
+	 * @param value
+	 *            the new value of the '<em>Description</em>' attribute.
 	 * @see #getDescription()
 	 * @generated
 	 */
@@ -96,86 +109,98 @@ public interface UnicaseModelElement extends EObject {
 
 	/**
 	 * Returns the value of the '<em><b>Annotations</b></em>' reference list.
-	 * The list contents are of type {@link org.unicase.model.Annotation}.
-	 * It is bidirectional and its opposite is '{@link org.unicase.model.Annotation#getAnnotatedModelElements <em>Annotated Model Elements</em>}'.
-	 * <!-- begin-user-doc -->
+	 * The list contents are of type {@link org.unicase.model.Annotation}. It is
+	 * bidirectional and its opposite is '
+	 * {@link org.unicase.model.Annotation#getAnnotatedModelElements
+	 * <em>Annotated Model Elements</em>}'. <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Annotations</em>' reference list isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
+	 * 
 	 * @return the value of the '<em>Annotations</em>' reference list.
 	 * @see org.unicase.model.ModelPackage#getUnicaseModelElement_Annotations()
 	 * @see org.unicase.model.Annotation#getAnnotatedModelElements
-	 * @model opposite="annotatedModelElements"
-	 *        annotation="org.eclipse.emf.ecp.editor priority='100.0' position='right'"
+	 * @model opposite="annotatedModelElements" annotation=
+	 *        "org.eclipse.emf.ecp.editor priority='100.0' position='right'"
 	 * @generated
 	 */
 	EList<Annotation> getAnnotations();
 
 	/**
 	 * Returns the value of the '<em><b>Attachments</b></em>' reference list.
-	 * The list contents are of type {@link org.unicase.model.Attachment}.
-	 * It is bidirectional and its opposite is '{@link org.unicase.model.Attachment#getReferringModelElements <em>Referring Model Elements</em>}'.
-	 * <!-- begin-user-doc -->
+	 * The list contents are of type {@link org.unicase.model.Attachment}. It is
+	 * bidirectional and its opposite is '
+	 * {@link org.unicase.model.Attachment#getReferringModelElements
+	 * <em>Referring Model Elements</em>}'. <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Attachments</em>' reference list isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
+	 * 
 	 * @return the value of the '<em>Attachments</em>' reference list.
 	 * @see org.unicase.model.ModelPackage#getUnicaseModelElement_Attachments()
 	 * @see org.unicase.model.Attachment#getReferringModelElements
-	 * @model opposite="referringModelElements"
-	 *        annotation="org.eclipse.emf.ecp.editor priority='101.0' position='right'"
+	 * @model opposite="referringModelElements" annotation=
+	 *        "org.eclipse.emf.ecp.editor priority='101.0' position='right'"
 	 * @generated
 	 */
 	EList<Attachment> getAttachments();
 
 	/**
-	 * Returns the value of the '<em><b>Incoming Document References</b></em>' reference list.
-	 * The list contents are of type {@link org.unicase.model.document.LeafSection}.
-	 * <!-- begin-user-doc -->
+	 * Returns the value of the '<em><b>Incoming Document References</b></em>'
+	 * reference list. The list contents are of type
+	 * {@link org.unicase.model.document.LeafSection}. <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Incoming Document References</em>' reference
 	 * list isn't clear, there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Incoming Document References</em>' reference list.
+	 * 
+	 * @return the value of the '<em>Incoming Document References</em>'
+	 *         reference list.
 	 * @see org.unicase.model.ModelPackage#getUnicaseModelElement_IncomingDocumentReferences()
-	 * @model annotation="org.eclipse.emf.ecp.editor priority='102.0' position='right'"
+	 * @model annotation=
+	 *        "org.eclipse.emf.ecp.editor priority='102.0' position='right'"
 	 * @generated
 	 */
 	EList<LeafSection> getIncomingDocumentReferences();
 
 	/**
-	 * Returns the value of the '<em><b>State</b></em>' attribute.
-	 * The default value is <code>""</code>.
-	 * <!-- begin-user-doc -->
+	 * Returns the value of the '<em><b>State</b></em>' attribute. The default
+	 * value is <code>""</code>. <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>State</em>' attribute isn't clear, there
 	 * really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
+	 * 
 	 * @return the value of the '<em>State</em>' attribute.
 	 * @see org.unicase.model.ModelPackage#getUnicaseModelElement_State()
-	 * @model default="" transient="true" changeable="false" volatile="true" derived="true"
+	 * @model default="" transient="true" changeable="false" volatile="true"
+	 *        derived="true"
 	 * @generated
 	 */
 	String getState();
 
 	/**
-	 * Returns the value of the '<em><b>Applied Stereotype Instances</b></em>' containment reference list.
-	 * The list contents are of type {@link org.unicase.model.profile.StereotypeInstance}.
-	 * It is bidirectional and its opposite is '{@link org.unicase.model.profile.StereotypeInstance#getModelElement <em>Model Element</em>}'.
-	 * <!-- begin-user-doc -->
+	 * Returns the value of the '<em><b>Applied Stereotype Instances</b></em>'
+	 * containment reference list. The list contents are of type
+	 * {@link org.unicase.model.profile.StereotypeInstance}. It is bidirectional
+	 * and its opposite is '
+	 * {@link org.unicase.model.profile.StereotypeInstance#getModelElement
+	 * <em>Model Element</em>}'. <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Applied Stereotype Instances</em>' containment
 	 * reference list isn't clear, there really should be more of a description
 	 * here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Applied Stereotype Instances</em>' containment reference list.
+	 * 
+	 * @return the value of the '<em>Applied Stereotype Instances</em>'
+	 *         containment reference list.
 	 * @see org.unicase.model.ModelPackage#getUnicaseModelElement_AppliedStereotypeInstances()
 	 * @see org.unicase.model.profile.StereotypeInstance#getModelElement
 	 * @model opposite="modelElement" containment="true" resolveProxies="true"
@@ -184,19 +209,23 @@ public interface UnicaseModelElement extends EObject {
 	EList<StereotypeInstance> getAppliedStereotypeInstances();
 
 	/**
-	 * Returns the value of the '<em><b>Comments</b></em>' containment reference list.
-	 * The list contents are of type {@link org.unicase.model.rationale.Comment}.
-	 * It is bidirectional and its opposite is '{@link org.unicase.model.rationale.Comment#getCommentedElement <em>Commented Element</em>}'.
-	 * <!-- begin-user-doc -->
+	 * Returns the value of the '<em><b>Comments</b></em>' containment reference
+	 * list. The list contents are of type
+	 * {@link org.unicase.model.rationale.Comment}. It is bidirectional and its
+	 * opposite is '
+	 * {@link org.unicase.model.rationale.Comment#getCommentedElement
+	 * <em>Commented Element</em>}'. <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Comments</em>' containment reference list
 	 * isn't clear, there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
+	 * 
 	 * @return the value of the '<em>Comments</em>' containment reference list.
 	 * @see org.unicase.model.ModelPackage#getUnicaseModelElement_Comments()
 	 * @see org.unicase.model.rationale.Comment#getCommentedElement
-	 * @model opposite="commentedElement" containment="true" resolveProxies="true"
+	 * @model opposite="commentedElement" containment="true"
+	 *        resolveProxies="true"
 	 *        annotation="org.eclipse.emf.ecp.editor priority='2.0' position='left'"
 	 * @generated
 	 */
