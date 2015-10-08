@@ -9,6 +9,7 @@ package org.unicase.ui.unicasecommon.common.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,12 +17,14 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecp.core.ECPProject;
 import org.eclipse.emf.ecp.core.util.ECPUtil;
 import org.eclipse.emf.ecp.emfstore.core.internal.EMFStoreProvider;
+import org.eclipse.emf.ecp.internal.core.ECPProjectImpl;
 import org.eclipse.emf.ecp.spi.core.InternalProject;
 import org.eclipse.emf.emfstore.client.ESLocalProject;
 import org.eclipse.emf.emfstore.client.ESUsersession;
 import org.eclipse.emf.emfstore.internal.client.accesscontrol.AccessControlHelper;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.exceptions.UnkownProjectException;
+import org.eclipse.emf.emfstore.internal.client.model.impl.api.ESLocalProjectImpl;
 import org.eclipse.emf.emfstore.internal.client.model.util.WorkspaceUtil;
 import org.eclipse.emf.emfstore.internal.common.model.Project;
 import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
@@ -51,7 +54,7 @@ public final class OrgUnitHelper {
 	/**
 	 * Returns the current User in the project, whos logged in.
 	 * 
-	 * @param modelElement
+	 * @param ecpProject2
 	 *            the current workspace
 	 * @return The current user
 	 * @throws NoCurrentUserException
@@ -59,10 +62,8 @@ public final class OrgUnitHelper {
 	 * @throws CannotMatchUserInProjectException
 	 *             if the current user cannot be found in the current project
 	 */
-	public static ESUsersession getUserSession(EObject modelElement)
+	public static ESUsersession getUserSession(ECPProject ecpProject)
 			throws UnkownProjectException {
-		ECPProject ecpProject = ECPUtil.getECPProjectManager().getProject(
-				modelElement);
 		ESLocalProject projectSpace = null;
 		if (ecpProject != null
 				&& ecpProject.getRepository() != null
@@ -93,15 +94,27 @@ public final class OrgUnitHelper {
 	 * @throws CannotMatchUserInProjectException
 	 *             if the user cannot be found in the project
 	 */
-	public static User getUser(Project project, String username) {
-		Set<User> projectUsers = project.getAllModelElementsByClass(User.class,
-				true);
+	public static User getUser(ECPProject project, String username) {
+		Set<User> projectUsers = getAllModelElementsByClass(project,
+				User.class, true);
 		for (User user : projectUsers) {
 			if (user.getName().equals(username)) {
 				return user;
 			}
 		}
 		return null;
+	}
+
+	public static <T extends EObject> Set<T> getAllModelElementsByClass(
+			ECPProject project, Class<T> instanceClass,
+			Boolean includeSubclasses) {
+		Object provider = ((ECPProjectImpl) project).getProviderSpecificData();
+		if (provider instanceof ESLocalProjectImpl) {
+			return ((ESLocalProjectImpl) provider).getAllModelElementsByClass(
+					instanceClass, true);
+		}
+		final LinkedHashSet<T> result = new LinkedHashSet<T>();
+		return result;
 	}
 
 	/**
@@ -259,4 +272,17 @@ public final class OrgUnitHelper {
 
 	}
 
+	@SuppressWarnings("restriction")
+	public static ESUsersession getUserSession(Project project) {
+		ECPProject ecpProject = ECPUtil.getECPProjectManager().getProject(
+				((ProjectSpace) project.eContainer()).getProjectName());
+		if (ecpProject != null) {
+			try {
+				getUserSession(ecpProject);
+			} catch (UnkownProjectException e) {
+				ModelUtil.logException(e);
+			}
+		}
+		return null;
+	}
 }

@@ -12,13 +12,15 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecp.core.ECPProject;
 import org.eclipse.emf.ecp.core.util.ECPUtil;
+import org.eclipse.emf.emfstore.client.ESUsersession;
 import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
 import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.Workspace;
+import org.eclipse.emf.emfstore.internal.client.model.exceptions.UnkownProjectException;
 import org.eclipse.emf.emfstore.internal.common.model.IdEObjectCollection;
 import org.eclipse.emf.emfstore.internal.common.model.Project;
 import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
@@ -47,7 +49,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 import org.unicase.model.ModelPackage;
 import org.unicase.model.organization.OrganizationFactory;
-import org.unicase.model.organization.OrganizationPackage;
 import org.unicase.model.organization.User;
 import org.unicase.model.task.Checkable;
 import org.unicase.model.task.TaskPackage;
@@ -61,6 +62,7 @@ import org.unicase.ui.unicasecommon.ModelElementContextListener;
 import org.unicase.ui.unicasecommon.common.filter.UserFilter;
 import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
 import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
+import org.unicase.ui.unicasecommon.navigator.commands.UiUtil;
 
 /**
  * TaskView shows checkables (work items which can be set to done).
@@ -103,6 +105,7 @@ public class TaskView extends ViewPart
 	private static final String TASKVIEW_FILTERS_GROUP = "taskviewFilters";
 	private static final String TASKVIEW_USER_GROUP = "taskviewUserFilter";
 	private static final Set<Project> VISITED_PROJECTS = new HashSet<Project>();
+	private ECPProject ecpProject;
 
 	/**
 	 * {@inheritDoc}
@@ -113,10 +116,8 @@ public class TaskView extends ViewPart
 	public void createPartControl(Composite parent) {
 
 		viewer = initMETableViewer(parent);
-
 		workspace = ESWorkspaceProviderImpl.getInstance()
 				.getInternalWorkspace();
-
 		selectionListener = new TaskViewSelectionListener();
 		contextListener = new TaskViewContextListener();
 
@@ -127,17 +128,24 @@ public class TaskView extends ViewPart
 		getSite().setSelectionProvider(viewer.getTableViewer());
 		hookDoubleClickAction();
 
-		if (ModelUtil.getProject((EObject) parent) != null) {
-			activeProject = ModelUtil.getProject((EObject) parent);
+		if (workspace.getProjectSpaces() != null
+				&& !workspace.getProjectSpaces().isEmpty()) {
+			activeProject = workspace.getProjectSpaces().get(0).getProject();
 			activeProject.addIdEObjectCollectionChangeObserver(this);
 			VISITED_PROJECTS.add(activeProject);
-			ECPUtil.getECPProjectManager().getProject(
-					modelElement)
-			ECPWorkspaceManager.getECPProject(activeProject)
-					.addModelElementContextListener(contextListener);
 		}
-		initLoggedInUser();
-		viewer.setInput(activeProject);
+		if (activeProject != null && activeProject instanceof Project) {
+			ecpProject = ECPUtil.getECPProjectManager().getProject(
+					((ProjectSpace) activeProject.eContainer())
+							.getProjectName());
+		}
+
+		try {
+			initLoggedInUser();
+		} catch (UnkownProjectException e) {
+
+		}
+		viewer.setInput(ecpProject);
 	}
 
 	/**
@@ -155,10 +163,9 @@ public class TaskView extends ViewPart
 			@Override
 			public void run() {
 				List<User> users = new ArrayList<User>();
-				List<User> projectUsers = activeProject
-						.getAllModelElementsbyClass(
-								OrganizationPackage.eINSTANCE.getUser(),
-								new BasicEList<User>());
+				List<User> projectUsers = (List<User>) OrgUnitHelper
+						.getAllModelElementsByClass(ecpProject, User.class,
+								true);
 				users.addAll(projectUsers);
 				User noUser = OrganizationFactory.eINSTANCE.createUser();
 				noUser.setName("[no user]");
@@ -376,17 +383,11 @@ public class TaskView extends ViewPart
 	 */
 	@Override
 	public void dispose() {
-		for (Project project : VISITED_PROJECTS) {
-			project.removeIdEObjectCollectionChangeObserver(this);
-			ECPProject ecpProject = ECPWorkspaceManager.getECPProject(project);
-			if (ecpProject != null) {
-				ecpProject.removeModelElementContextListener(contextListener);
-			}
-		}
 		VISITED_PROJECTS.clear();
-
 		getSite().getPage().removeSelectionListener(selectionListener);
-
+		if (viewer != null) {
+			viewer = null;
+		}
 		super.dispose();
 	}
 
@@ -450,15 +451,16 @@ public class TaskView extends ViewPart
 		return metv;
 	}
 
-	private void initLoggedInUser() {
+	private void initLoggedInUser() throws UnkownProjectException {
 		if (activeProject != null) {
+			ESUsersession usersession = null;
 			try {
-				loggedInUser = OrgUnitHelper.getUser(WorkspaceManager
-						.getProjectSpace(activeProject));
-			} catch (NoCurrentUserException e) {
-				loggedInUser = null;
-			} catch (CannotMatchUserInProjectException e) {
-				loggedInUser = null;
+				usersession = OrgUnitHelper.getUserSession(ecpProject);
+			} catch (UnkownProjectException e) {
+			}
+			if (usersession != null) {
+				loggedInUser = OrgUnitHelper.getUser(ecpProject,
+						usersession.getUsername());
 			}
 		}
 		selectedUser = null;
@@ -550,7 +552,7 @@ public class TaskView extends ViewPart
 	 */
 	public void notify(Notification notification, IdEObjectCollection project,
 			EObject modelElement) {
-		if (modelElement instanceof Checkable) {
+		if (modelElement instanceof Checkable && viewer != null) {
 			viewer.refresh();
 		}
 	}
@@ -742,12 +744,13 @@ public class TaskView extends ViewPart
 				activeProject
 						.addIdEObjectCollectionChangeObserver(TaskView.this);
 				VISITED_PROJECTS.add(activeProject);
-
-				ECPWorkspaceManager.getECPProject(activeProject)
-						.addModelElementContextListener(contextListener);
 			}
-			initLoggedInUser();
-			viewer.setInput(activeProject);
+			try {
+				initLoggedInUser();
+			} catch (UnkownProjectException e) {
+
+			}
+			viewer.setInput(ecpProject);
 		}
 	}
 
@@ -770,7 +773,7 @@ public class TaskView extends ViewPart
 				VISITED_PROJECTS.remove(activeProject);
 			}
 			activeProject = null;
-			viewer.setInput(activeProject);
+			viewer.setInput(ecpProject);
 		}
 
 	}

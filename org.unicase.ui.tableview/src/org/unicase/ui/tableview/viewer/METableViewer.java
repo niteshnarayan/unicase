@@ -17,7 +17,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.emfstore.internal.common.model.Project;
+import org.eclipse.emf.ecp.core.ECPProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -527,7 +527,7 @@ public class METableViewer {
 	 * @param meType
 	 *            model element type to be shown in METableViwer
 	 */
-	public void setInput(Project project, EClass meType) {
+	public void setInput(ECPProject project, EClass meType) {
 		if (!contentType.getName().equals(meType.getName())) {
 			tableViewer.setInput(Collections.emptyList());
 			tableViewer.refresh();
@@ -546,14 +546,14 @@ public class METableViewer {
 	/**
 	 * set input. if content type is null then all model elements are shown.
 	 * 
-	 * @param project
+	 * @param ecpProject
 	 *            project
 	 */
-	public void setInput(Project project) {
-		if (project == null) {
+	public void setInput(ECPProject ecpProject) {
+		if (ecpProject == null) {
 			tableViewer.setInput(Collections.emptyList());
 		} else {
-			tableViewer.setInput(project);
+			tableViewer.setInput(ecpProject);
 		}
 		// if (contentType == null) {
 		// contentType = ModelPackage.eINSTANCE.getModelElement();

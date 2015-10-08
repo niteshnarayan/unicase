@@ -15,8 +15,10 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecp.core.ECPProject;
-import org.eclipse.emf.emfstore.client.ESWorkspace;
-import org.eclipse.emf.emfstore.client.ESWorkspaceProvider;
+import org.eclipse.emf.ecp.core.util.ECPUtil;
+import org.eclipse.emf.emfstore.internal.client.model.ESWorkspaceProviderImpl;
+import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
+import org.eclipse.emf.emfstore.internal.client.model.Workspace;
 import org.eclipse.emf.emfstore.internal.common.model.IdEObjectCollection;
 import org.eclipse.emf.emfstore.internal.common.model.Project;
 import org.eclipse.jface.action.Action;
@@ -41,6 +43,7 @@ import org.unicase.ui.tableview.viewer.METableViewer;
 import org.unicase.ui.taskview.TaskView;
 import org.unicase.ui.unicasecommon.common.util.UnicaseActionHelper;
 import org.unicase.ui.unicasecommon.common.util.UnicaseUiUtil;
+import org.unicase.ui.unicasecommon.navigator.commands.UiUtil;
 
 /**
  * A specialized UnicaseTableView to display all Attributes of model element.
@@ -97,10 +100,12 @@ public class UnicaseTableView extends ViewPart
 	private METableViewer viewer;
 
 	private Project activeProject;
-	private ESWorkspace workspace;
+	private Workspace workspace;
 	private AdapterImpl workspaceListenerAdapter;
 
 	private Text txtFilter;
+
+	private ECPProject ecpProject;
 
 	/**
 	 * {@inheritDoc}
@@ -119,44 +124,24 @@ public class UnicaseTableView extends ViewPart
 		viewer.createColumns(EcoreFactory.eINSTANCE.getEcorePackage()
 				.getEObject(), null, false);
 
-		workspace = ESWorkspaceProvider.INSTANCE.getWorkspace();
-
-		workspaceListenerAdapter = new AdapterImpl() {
-
-			@Override
-			public void notifyChanged(Notification msg) {
-				if ((msg.getFeatureID(ECPWorkspace.class)) == org.eclipse.emf.ecp.common.model.workSpaceModel.WorkSpaceModelPackage.ECP_WORKSPACE__ACTIVE_PROJECT) {
-					ECPProject activeECPProject = workspace.getActiveProject();
-					if (activeECPProject != null) {
-						activeProject = (Project) activeECPProject
-								.getRootContainer();
-						activeProject
-								.addIdEObjectCollectionChangeObserver(UnicaseTableView.this);
-
-						viewer.setInput(activeProject);
-					} else {
-						activeProject = null;
-						viewer.setInput(activeProject);
-					}
-
-				}
-				super.notifyChanged(msg);
-			}
-		};
-		workspace.eAdapters().add(workspaceListenerAdapter);
+		workspace = ESWorkspaceProviderImpl.getInstance()
+				.getInternalWorkspace();
+		if (workspace.getProjectSpaces() != null
+				&& !workspace.getProjectSpaces().isEmpty()) {
+			activeProject = workspace.getProjectSpaces().get(0).getProject();
+			activeProject.addIdEObjectCollectionChangeObserver(this);
+		}
+		if (activeProject != null && activeProject instanceof Project) {
+			ecpProject = ECPUtil.getECPProjectManager().getProject(
+					((ProjectSpace) activeProject.eContainer())
+							.getProjectName());
+		}
 
 		createActions();
 
 		getSite().setSelectionProvider(viewer.getTableViewer());
-
 		hookDoubleClickAction();
-
-		if (workspace.getActiveProject() != null) {
-			activeProject = (Project) workspace.getActiveProject()
-					.getRootContainer();
-			activeProject.addIdEObjectCollectionChangeObserver(this);
-		}
-		viewer.setInput(activeProject);
+		viewer.setInput(ecpProject);
 		viewer.addFilter(new ModelElementNameFilter());
 	}
 
@@ -213,7 +198,7 @@ public class UnicaseTableView extends ViewPart
 				EClass meType = UnicaseUiUtil.showMETypeSelectionDialog(
 						getSite().getShell(), true, false);
 				if (meType != null) {
-					viewer.setInput(activeProject, meType);
+					viewer.setInput(ecpProject, meType);
 				}
 			}
 
@@ -263,12 +248,12 @@ public class UnicaseTableView extends ViewPart
 	 */
 	@Override
 	public void dispose() {
-		workspace.eAdapters().remove(workspaceListenerAdapter);
-		if (workspace.getActiveProject() != null
-				&& workspace.getActiveProject().getRootContainer() != null) {
-			((Project) workspace.getActiveProject().getRootContainer())
-					.removeIdEObjectCollectionChangeObserver(this);
-		}
+		// workspace.eAdapters().remove(workspaceListenerAdapter);
+		// if (workspace.getActiveProject() != null
+		// && workspace.getActiveProject().getRootContainer() != null) {
+		// ((Project) workspace.getActiveProject().getRootContainer())
+		// .removeIdEObjectCollectionChangeObserver(this);
+		// }
 
 		super.dispose();
 	}

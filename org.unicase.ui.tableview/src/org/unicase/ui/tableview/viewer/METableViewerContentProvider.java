@@ -8,14 +8,15 @@ package org.unicase.ui.tableview.viewer;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
-import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.emfstore.internal.common.model.Project;
+import org.eclipse.emf.ecp.core.ECPProject;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.unicase.model.UnicaseModelElement;
+import org.unicase.model.task.Checkable;
+import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
 
 /**
  * This is the content provider for TaskView. Taskview shows checkables only.
@@ -24,7 +25,7 @@ import org.unicase.model.UnicaseModelElement;
  */
 public class METableViewerContentProvider implements IStructuredContentProvider {
 
-	private Project project;
+	private ECPProject project;
 	private EClass meType;
 	private Collection<? extends UnicaseModelElement> directInput;
 
@@ -33,6 +34,8 @@ public class METableViewerContentProvider implements IStructuredContentProvider 
 	 * 
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
+	@Override
 	public Object[] getElements(Object inputElement) {
 		if (meType == null || project == null) {
 			if (directInput != null) {
@@ -40,10 +43,19 @@ public class METableViewerContentProvider implements IStructuredContentProvider 
 			}
 			return new Object[0];
 		}
+		Set<? extends EClass> content;
+		if (meType.getInstanceClass() == Checkable.class) {
+			content = (Set<? extends EClass>) OrgUnitHelper
+					.getAllModelElementsByClass(project, Checkable.class, true);
+		} else if (meType.getInstanceClass() == UnicaseModelElement.class) {
+			content = (Set<? extends EClass>) OrgUnitHelper
+					.getAllModelElementsByClass(project,
+							UnicaseModelElement.class, true);
+		} else {
+			content = OrgUnitHelper.getAllModelElementsByClass(project,
+					meType.getClass(), true);
+		}
 
-		List<? extends UnicaseModelElement> content = project
-				.getAllModelElementsbyClass(meType,
-						new BasicEList<UnicaseModelElement>());
 		return content.toArray();
 
 	}
@@ -53,6 +65,7 @@ public class METableViewerContentProvider implements IStructuredContentProvider 
 	 * 
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 	}
 
@@ -62,11 +75,12 @@ public class METableViewerContentProvider implements IStructuredContentProvider 
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
 	 *      java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput != oldInput) {
-			if (newInput instanceof org.eclipse.emf.emfstore.common.model.Project) {
-				this.project = (Project) newInput;
+			if (newInput instanceof ECPProject) {
+				this.project = (ECPProject) newInput;
 				directInput = null;
 			} else if (newInput instanceof Collection) {
 				this.directInput = (Collection<? extends UnicaseModelElement>) newInput;

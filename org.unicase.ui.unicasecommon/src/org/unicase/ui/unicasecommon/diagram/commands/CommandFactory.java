@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -33,7 +32,6 @@ import org.eclipse.gmf.runtime.emf.core.util.EObjectAdapter;
 import org.eclipse.gmf.runtime.emf.type.core.ElementTypeRegistry;
 import org.eclipse.gmf.runtime.emf.type.core.IElementType;
 import org.eclipse.gmf.runtime.emf.type.core.IHintedType;
-import org.eclipse.gmf.runtime.emf.type.core.requests.DestroyElementRequest;
 import org.eclipse.gmf.runtime.notation.Edge;
 import org.eclipse.gmf.runtime.notation.Node;
 import org.eclipse.gmf.runtime.notation.View;
@@ -183,46 +181,6 @@ public class CommandFactory {
 		View viewToDestroy = EditPartUtility.getView(editPart);
 		DeleteCommand deleteCommand = new DeleteCommand(viewToDestroy);
 		return new ICommandProxy(deleteCommand);
-	}
-
-	/**
-	 * @param editPart
-	 *            The {@link EditPart} whose {@link View} should be deleted
-	 * @return A {@link DeleteCommand} wrapped in an {@link ICommandProxy}
-	 */
-	public static Command createDeleteFromDiagramCommand(EditPart editPart) {
-		DestroyElementRequest request = new DestroyElementRequest(
-				(TransactionalEditingDomain) editPart.getParent().getViewer()
-						.getEditDomain(), EditPartUtility.getElement(editPart),
-				false);
-		IElementType type = ElementTypeRegistry.getInstance().getElementType(
-				request.getEditHelperContext());
-		if (type != null) {
-			return new ICommandProxy(new DeleteFromDiagramCommand(request,
-					editPart));
-		}
-		// return null: a null command within a CompoundCommand is not executed.
-		return null;
-	}
-
-	/**
-	 * @param editPart
-	 *            The {@link EditPart} of the model element which should be
-	 *            deleted
-	 * @return A {@link DeleteCommand} wrapped in an {@link ICommandProxy}
-	 */
-	public static Command createDeleteFromModelCommand(EditPart editPart) {
-		DestroyElementRequest request = new DestroyElementRequest(
-				(TransactionalEditingDomain) editPart.getParent().getViewer()
-						.getEditDomain(), EditPartUtility.getElement(editPart),
-				false);
-		IElementType type = ElementTypeRegistry.getInstance().getElementType(
-				request.getEditHelperContext());
-		if (type != null) {
-			return new ICommandProxy(new DeleteFromModelCommand(request));
-		}
-		// return null: a null command within a CompoundCommand is not executed.
-		return null;
 	}
 
 	/**

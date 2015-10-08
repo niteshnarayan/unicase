@@ -9,9 +9,13 @@ package org.unicase.ui.unicasecommon.common;
 import java.util.Date;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecp.core.ECPProject;
+import org.eclipse.emf.ecp.core.util.ECPUtil;
 import org.eclipse.emf.emfstore.client.ESUsersession;
 import org.eclipse.emf.emfstore.client.observer.ESPostCreationObserver;
+import org.eclipse.emf.emfstore.internal.client.model.ProjectSpace;
 import org.eclipse.emf.emfstore.internal.client.model.exceptions.UnkownProjectException;
+import org.eclipse.emf.emfstore.internal.common.model.Project;
 import org.eclipse.emf.emfstore.internal.common.model.util.ModelUtil;
 import org.unicase.model.UnicaseModelElement;
 import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
@@ -22,6 +26,7 @@ import org.unicase.ui.unicasecommon.common.util.OrgUnitHelper;
  * 
  * @author emueller
  */
+@SuppressWarnings("restriction")
 public class UnicasePostModelElementCreationListener implements
 		ESPostCreationObserver {
 
@@ -41,15 +46,30 @@ public class UnicasePostModelElementCreationListener implements
 
 			unicaseModelElement.setCreationDate(new Date());
 			ESUsersession userSession = null;
-
+			EObject rootContainer = getRootContainer(modelElement);
+			if (!(rootContainer instanceof Project)) {
+				return;
+			}
+			ECPProject ecpProject = ECPUtil.getECPProjectManager().getProject(
+					((ProjectSpace) rootContainer.eContainer())
+							.getProjectName());
 			try {
-				userSession = OrgUnitHelper.getUserSession(modelElement);
+				userSession = OrgUnitHelper.getUserSession(ecpProject);
 			} catch (UnkownProjectException e) {
 				ModelUtil.logWarning(e.getMessage(), e);
 			}
 			if (userSession != null) {
 				unicaseModelElement.setCreator(userSession.getUsername());
 			}
+		}
+	}
+
+	private EObject getRootContainer(EObject modelElement) {
+		EObject eContainer = modelElement.eContainer();
+		if (eContainer instanceof Project) {
+			return eContainer;
+		} else {
+			return getRootContainer(eContainer);
 		}
 	}
 }

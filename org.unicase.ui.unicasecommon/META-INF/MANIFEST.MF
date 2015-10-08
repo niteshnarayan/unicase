@@ -49,11 +49,12 @@ Export-Package: org.unicase.ui.unicasecommon,
  org.unicase.ui.unicasecommon.file.util,
  org.unicase.ui.unicasecommon.meeditor.mecontrols,
  org.unicase.ui.unicasecommon.meeditor.mecontrols.issuecontrol,
- org.unicase.ui.unicasecommon.navigator.wizards,
- org.unicase.ui.unicasecommon.observer
+ org.unicase.ui.unicasecommon.navigator.commands,
+ org.unicase.ui.unicasecommon.navigator.wizards
 Import-Package: org.eclipse.emf.common.ui,
  org.eclipse.ui.part,
  org.unicase.model.diagram,
  org.unicase.model.diagram.impl,
+ org.unicase.model.diagram.util,
  org.unicase.ui.unicasecommon.meeditor.mecontrols
 Bundle-Vendor: unicase.org
